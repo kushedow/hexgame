@@ -5,44 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hex Strategy Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/pinia@3/dist/pinia.iife.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: none; }
-        #game-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        #game-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; padding: 10px; color: white; z-index: 10; }
-        .stat-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 12px; border: 1px solid #475569; pointer-events: auto; }
-        
-        /* Стек уведомлений сверху по центру */
-        #notification-stack {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            gap: 8px;
-            z-index: 50;
-            pointer-events: none;
-            width: 100%;
-            max-width: 400px;
-        }
-
         .notification-item {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
             animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            text-align: center;
-            width: fit-content;
-            border-left-width: 4px;
         }
 
         @keyframes slideInUp {
@@ -56,33 +24,17 @@
             transition: all 0.5s ease;
         }
 
-        #log-container { position: absolute; bottom: 15px; left: 15px; width: 280px; transition: all 0.3s ease; z-index: 20; pointer-events: auto; }
-        #log { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); border-radius: 12px; border: 1px solid #334155; overflow: hidden; display: flex; flex-direction: column; }
-        #log-header { padding: 8px 12px; background: rgba(30, 41, 59, 0.5); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        #log-content { max-height: 120px; overflow-y: auto; padding: 10px; transition: max-height 0.3s ease; }
-        .log-collapsed #log-content { max-height: 0; padding-top: 0; padding-bottom: 0; }
-        
-        #action-panel { position: absolute; bottom: 15px; right: 15px; pointer-events: auto; z-index: 20; }
-        .btn-label { display: inline; }
-        @media (max-width: 640px) {
-            .btn-label { display: none; }
-            #btn-build { width: 56px; height: 56px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; font-size: 24px; }
-            #log-container { width: calc(100% - 100px); }
-        }
-
-        #tooltip { position: fixed; pointer-events: none; z-index: 1000; background: rgba(15, 23, 42, 0.95); border: 1px solid #475569; color: #f8fafc; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5); border-left: 4px solid #3b82f6; }
-        .overlay-screen { position: absolute; inset: 0; background: rgba(2, 6, 23, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; padding: 2rem; text-align: center; }
-        canvas { cursor: default; }
     </style>
 </head>
-<body>
+<body class="m-0 bg-slate-900 h-screen overflow-hidden touch-none flex justify-center items-center font-['Segoe_UI',sans-serif]">
 
-    <div id="game-wrapper">
-        <div id="game-container">
+    <div id="app" class="w-full h-full">
+    <div id="game-wrapper" class="relative w-screen h-screen flex justify-center items-center">
+        <div id="game-container" class="w-full h-full relative overflow-hidden">
             <!-- Стек для всплывающих уведомлений -->
-            <div id="notification-stack"></div>
+            <div id="notification-stack" class="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-2 z-50 pointer-events-none w-full max-w-[400px]"></div>
 
-            <div id="start-screen" class="overlay-screen">
+            <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="!store.gameStarted">
                 <div class="max-w-md">
                     <h1 class="text-4xl font-black text-white mb-6 tracking-tight italic uppercase">Hex Strategy</h1>
                     <div class="text-slate-300 space-y-4 mb-8 text-sm leading-relaxed">
@@ -90,60 +42,89 @@
                         <p>Справа наверху предсказаны броски кубиков. Если на нем выпало <span class="text-purple-400 font-bold">6</span> — шагните на клетку с цифрой <span class="text-purple-400 font-bold">6</span> для активации.</p>
                         <p>Цель: заработать <span class="text-yellow-500 font-bold">100 золота</span>. Используйте кнопку <span class="text-amber-400 font-bold">«Улучшить»</span> для трансформации клеток.</p>
                     </div>
-                    <button onclick="startGame()" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg shadow-blue-900/20 transition-all">
+                    <button @click="startGame" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg shadow-blue-900/20 transition-all">
                         Начать игру
                     </button>
                 </div>
             </div>
 
-            <div id="ui-layer">
-                <div class="flex justify-between items-start w-full">
-                    <div class="flex space-x-2">
-                        <div class="stat-card border-b-2 border-red-500">
-                            <div class="text-[10px] uppercase font-bold opacity-50">Здоровье</div>
-                            <div id="food-val" class="text-lg font-black text-red-500">50</div>
+
+
+            <!-- UI Layer -->
+            <div id="ui-layer" class="fixed top-4 left-0 w-full px-4 pointer-events-none text-white z-10">
+                <!-- Основной контейнер-ряд -->
+                <div class="flex flex-row items-center justify-center gap-3 w-full max-w-5xl mx-auto">
+
+                    <!-- Центральная панель с кубиками -->
+                    <div class="bg-slate-900/90 backdrop-blur px-3 py-2 rounded-xl border border-slate-600 pointer-events-auto flex flex-row items-center gap-4 shadow-xl">
+                        <div class="flex items-center gap-3">
+                            <!-- Текущий бросок -->
+                            <div class="flex items-center">
+                        <span id="dice-val" class="text-4xl font-black text-purple-100">
+                            🎲 {{ store.diceRolls[0] ?? '--' }}
+                        </span>
+                            </div>
+
+                            <span class="text-slate-500 font-bold">→</span>
+                            <div class="flex items-center">
+                                <span id="next-1" class="text-4xl font-black text-purple-400">{{ store.diceRolls[1] ?? '?' }}</span>
+                            </div>
+
+                            <span class="text-slate-500 font-bold">→</span>
+                            <div class="flex items-center">
+                                <span id="next-2" class="text-4xl font-black text-purple-600">{{ store.diceRolls[2] ?? '?' }}</span>
+                            </div>
+
                         </div>
-                        <div class="stat-card border-b-2 border-yellow-500">
-                            <div class="text-[10px] uppercase font-bold opacity-50">Золото</div>
-                            <div id="money-val" class="text-lg font-black text-yellow-500">0</div>
+
+                        <!-- Разделитель -->
+                        <div class="w-[1px] h-8 bg-slate-700 mx-2"></div>
+
+                        <!-- Еда -->
+                        <div class="flex flex-col items-center">
+                            <div class="text-[10px] uppercase font-bold text-slate-500">💛</div>
+                            <div id="food-val" class="text-xl font-black text-red-500 leading-none mt-1">{{ store.health }}</div>
                         </div>
+                        <!-- Золото -->
+                        <div class="flex flex-col items-center">
+                            <div class="text-[10px] uppercase font-bold text-slate-500">🧈</div>
+                            <div id="money-val" class="text-xl font-black text-yellow-500 leading-none mt-1">{{ store.gold }}</div>
+                        </div>
+
                     </div>
-                    
-                    <div class="stat-card flex flex-col items-center border-b-2 border-purple-500">
-                        <div id="dice-val" class="text-2xl font-black text-purple-400">🎲 --</div>
-                        <div class="flex space-x-2 mt-1">
-                            <div id="next-1" class="prediction-badge text-purple-300">?</div>
-                            <div id="next-2" class="prediction-badge text-purple-400/50">?</div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
-            <div id="log-container">
-                <div id="log">
-                    <div id="log-header" onclick="toggleLog()">
+
+
+            <div id="log-container" class="absolute bottom-[15px] left-[15px] w-[280px] max-sm:w-[calc(100%-100px)] transition-all duration-300 z-20 pointer-events-auto">
+                <div id="log" class="bg-slate-900/90 backdrop-blur rounded-xl border border-slate-700 overflow-hidden flex flex-col">
+                    <div id="log-header" @click="toggleLog" class="px-3 py-2 bg-slate-800/50 flex justify-between items-center cursor-pointer">
                         <span class="text-[10px] uppercase font-bold tracking-widest text-blue-400">Журнал</span>
-                        <span id="log-toggle-icon">▼</span>
+                        <span id="log-toggle-icon">{{ logCollapsed ? '▲' : '▼' }}</span>
                     </div>
-                    <div id="log-content" class="space-y-1 text-slate-400 text-xs"></div>
+                    <div id="log-content" class="space-y-1 text-slate-400 text-xs overflow-y-auto transition-all duration-300" :class="logCollapsed ? 'max-h-0 pt-0 pb-0 px-2.5' : 'max-h-[120px] p-2.5'">
+                        <div v-for="(entry, index) in store.journal" :key="`${index}-${entry}`" class="py-0.5 border-b border-white/5 text-slate-400">› {{ entry }}</div>
+                    </div>
                 </div>
             </div>
             
-            <div id="action-panel">
-                <button onclick="buildUpgrade()" id="btn-build" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all border border-amber-400 disabled:opacity-50">
-                    <span class="btn-label text-sm text-white">Улучшить (50)</span>
-                    <span class="sm:hidden text-2xl">🔨</span>
+            <div id="action-panel" class="absolute left-1/2 top-[calc(50%+230px)] -translate-x-1/2 pointer-events-auto z-20">
+                <button @click="buildUpgrade" id="btn-build" :disabled="!canUpgrade" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all border border-amber-400 disabled:opacity-50 flex flex-col items-center gap-0.5 min-w-52">
+                    <span id="btn-build-label" class="text-sm text-white">{{ upgradeLabel }}</span>
+                    <span id="btn-build-shortage" v-if="showShortage" class="text-[10px] leading-none text-amber-100/80">Не хватает {{ missingGold }}</span>
                 </button>
             </div>
 
-            <div id="win-screen" class="hidden overlay-screen">
-                <h1 id="win-title" class="text-4xl font-black mb-2 italic"></h1>
-                <p id="win-msg" class="text-slate-400 mb-8"></p>
+            <div id="win-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="winState">
+                <h1 id="win-title" class="text-4xl font-black mb-2 italic" :class="winState.colorClass">{{ winState.title }}</h1>
+                <p id="win-msg" class="text-slate-400 mb-8">{{ winState.message }}</p>
                 <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold">Заново</button>
             </div>
 
-            <div id="tooltip"></div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -160,78 +141,143 @@
             MOUNTAIN: `<svg width="34" height="25" viewBox="0 0 34 25" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M2.96969 24.5H30.7541C32.5497 24.5 34 23.0016 34 21.1586C34 20.5461 33.8353 19.9445 33.5272 19.4195L26.5147 7.59063C26.2969 7.22422 25.9144 7 25.5 7C25.0856 7 24.7031 7.22422 24.4853 7.58516L21.9247 11.9055L15.2362 0.929688C14.8856 0.35 14.2641 0 13.6 0C12.9359 0 12.3197 0.35 11.9637 0.929688L0.456875 19.8188C0.159375 20.3055 0 20.8687 0 21.443C0 23.1328 1.32813 24.5 2.96969 24.5Z" fill="black"/></svg>`
         };
 
-        const TYPES = {
-            LAVA:      { color: 0xDB9966, name: 'Лава', effect: 'здоровье -50' },
-            WASTELAND: { color: 0xF0F0F0, name: 'Пустошь', effect: 'золото -15' },
-            FIELD:     { color: 0xBBCDB6, name: 'Поле', effect: 'здоровье +10' },
-            VILLAGE:   { color: 0xFCE7A1, name: 'Деревня', effect: 'здоровье +10, золото +15' },
-            CITY:      { color: 0xF2B755, name: 'Город', effect: 'золото +30' },
-            FOREST:    { color: 0x99A68F, name: 'Лес', effect: 'здоровье +10' },
-            MOUNTAIN:  { color: 0xECE3D4, name: 'Горы', effect: 'золото +15' }
-        };
+        const { createApp, computed, ref } = Vue;
+        const { createPinia, defineStore } = Pinia;
 
-        const UPGRADE_PATH = {
-            'LAVA': 'WASTELAND',
-            'WASTELAND': 'FIELD',
-            'FIELD': 'VILLAGE',
-            'VILLAGE': 'CITY'
-        };
+        const useGameStore = defineStore('game', {
+            state: () => ({
+                playerPosition: { q: 0, r: 0 },
+                diceRolls: [],
+                health: 50,
+                gold: 0,
+                map: {},
+                tileTypes: {
+                    LAVA: { color: 0xDB9966, name: 'Лава', tooltipEffect: 'здоровье -50', effect: { health: -50, gold: 0, description: '-50 здоровья', isPositive: false } },
+                    WASTELAND: { color: 0xF0F0F0, name: 'Пустошь', tooltipEffect: 'золото -15', effect: { health: 0, gold: -15, description: '-15 золота', isPositive: false } },
+                    FIELD: { color: 0xBBCDB6, name: 'Поле', tooltipEffect: 'здоровье +10', effect: { health: 10, gold: 0, description: '+10 здоровья', isPositive: true } },
+                    VILLAGE: { color: 0xFCE7A1, name: 'Деревня', tooltipEffect: 'здоровье +10, золото +15', effect: { health: 10, gold: 15, description: '+10/+15', isPositive: true } },
+                    CITY: { color: 0xF2B755, name: 'Город', tooltipEffect: 'золото +30', effect: { health: 0, gold: 30, description: '+30 золота', isPositive: true } },
+                    FOREST: { color: 0x99A68F, name: 'Лес', tooltipEffect: 'здоровье +10', effect: { health: 10, gold: 0, description: '+10 здоровья', isPositive: true } },
+                    MOUNTAIN: { color: 0xECE3D4, name: 'Горы', tooltipEffect: 'золото +15', effect: { health: 0, gold: 15, description: '+15 золота', isPositive: true } }
+                },
+                upgradePath: {
+                    LAVA: 'WASTELAND',
+                    WASTELAND: 'FIELD',
+                    FIELD: 'VILLAGE',
+                    VILLAGE: 'CITY'
+                },
+                spawnableTypes: ['FOREST', 'MOUNTAIN', 'WASTELAND', "FIELD"],
+                journal: [],
+                turns: 0,
+                gameStarted: false
+            }),
+            getters: {
+                currentTile(state) {
+                    return state.map[`${state.playerPosition.q},${state.playerPosition.r}`] || null;
+                }
+            },
+            actions: {
+                initializeDice() {
+                    this.diceRolls = [rollDiceValue(), rollDiceValue(), rollDiceValue()];
+                },
+                consumeDiceRoll() {
+                    if (!this.diceRolls.length) return null;
+                    const roll = this.diceRolls.shift();
+                    this.diceRolls.push(rollDiceValue());
+                    return roll;
+                },
+                setMapTile(tile) {
+                    this.map[`${tile.q},${tile.r}`] = tile;
+                },
+                setTileType(q, r, typeKey) {
+                    const key = `${q},${r}`;
+                    if (!this.map[key]) return;
+                    this.map[key].typeKey = typeKey;
+                },
+                setPlayerPosition(q, r) {
+                    this.playerPosition = { q, r };
+                },
+                adjustHealth(delta) {
+                    this.health += delta;
+                },
+                adjustGold(delta) {
+                    this.gold = Math.max(0, this.gold + delta);
+                },
+                spendGold(value) {
+                    if (this.gold < value) return false;
+                    this.gold -= value;
+                    return true;
+                },
+                addJournal(entry) {
+                    this.journal.unshift(entry);
+                },
+                incrementTurns() {
+                    this.turns += 1;
+                },
+                applyEffect(typeKey) {
+                    const tileType = this.tileTypes[typeKey];
+                    if (!tileType) {
+                        return { name: 'Неизвестно', desc: 'Нет эффекта', isPositive: true };
+                    }
+                    const effect = tileType.effect || {};
+                    this.adjustHealth(effect.health || 0);
+                    this.adjustGold(effect.gold || 0);
+                    return {
+                        name: tileType.name,
+                        desc: effect.description || '',
+                        isPositive: effect.isPositive !== false
+                    };
+                }
+            }
+        });
 
-        const config = {
-            type: Phaser.AUTO,
-            width: window.innerWidth,
-            height: window.innerHeight,
-            parent: 'game-container',
-            backgroundColor: '#0f172a',
-            scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
-            scene: { preload, create, update }
-        };
-
-        let player = { food: 50, money: 0, q: 0, r: 0, sprite: null, isMoving: false };
-        let hexGrid = {};
-        let gridContainer;
+        let store;
         let scene;
-        let diceQueue = [];
+        let gridContainer;
+        let playerSprite;
+        let playerIsMoving = false;
+        const hexGrid = {};
+        const HOVER_HINT_DELAY_MS = 3000;
+        const IDLE_HINT_DELAY_MS = 10000;
+        let idleHintTimeoutId = null;
 
-        function startGame() { 
-            document.getElementById('start-screen').style.display = 'none'; 
-            showNotification("Выберите поле, чтобы переместиться.\nДля начала разыщите золото в горах!", "#3b82f6", 5000);
+        function getIdleHintMessage() {
+            const current = store.diceRolls[0] ?? '--';
+            const next1 = store.diceRolls[1] ?? '?';
+            const next2 = store.diceRolls[2] ?? '?';
+            return `Пора двигаться: сейчас активны поля с номером ${current}, затем активируются поля с номером ${next1}, затем ${next2}. Шагайте на активное поле, чтобы собрать ресурсы!`;
         }
-        
-        function toggleLog() {
-            const container = document.getElementById('log-container');
-            const icon = document.getElementById('log-toggle-icon');
-            container.classList.toggle('log-collapsed');
-            icon.innerText = container.classList.contains('log-collapsed') ? '▲' : '▼';
+
+        function resetIdleHintTimer() {
+            if (idleHintTimeoutId) {
+                clearTimeout(idleHintTimeoutId);
+            }
+            idleHintTimeoutId = setTimeout(() => {
+                const isGameActive = store && store.gameStarted && store.health > 0 && store.gold < 100;
+                if (!isGameActive) return;
+                showNotification(getIdleHintMessage(), "#60a5fa", 5000);
+            }, IDLE_HINT_DELAY_MS);
         }
 
         function preload() {
-            Object.keys(ICONS).forEach(key => {
-                const blob = new Blob([ICONS[key]], {type: 'image/svg+xml;charset=utf-8'});
+            Object.keys(ICONS).forEach((key) => {
+                const blob = new Blob([ICONS[key]], { type: 'image/svg+xml;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 this.load.image(`icon_${key}`, url);
             });
         }
 
-        /**
-         * Новая функция уведомлений в HTML-слое.
-         * Уведомления стакаются по центру сверху.
-         */
         function showNotification(text, color = "#ffffff", duration = 3000) {
             const stack = document.getElementById('notification-stack');
             const item = document.createElement('div');
-            item.className = 'notification-item';
+            item.className = 'notification-item bg-slate-900/95 backdrop-blur border border-white/10 text-white py-2.5 px-5 rounded-xl font-bold text-sm shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] text-center w-fit border-l-4';
             item.innerText = text;
             item.style.borderColor = color;
-            
             stack.appendChild(item);
 
-            // Удаление через заданное время с анимацией затухания
             setTimeout(() => {
                 item.classList.add('notification-fade-out');
-                setTimeout(() => {
-                    item.remove();
-                }, 500);
+                setTimeout(() => item.remove(), 500);
             }, duration);
         }
 
@@ -239,17 +285,17 @@
             scene = this;
             gridContainer = this.add.container(scene.scale.width / 2, scene.scale.height / 2);
 
-            for(let i = 0; i < 3; i++) diceQueue.push(rollDiceValue());
-            updateDiceUI();
+            store.initializeDice();
 
             for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
-                let r1 = Math.max(-MAP_RADIUS, -q - MAP_RADIUS);
-                let r2 = Math.min(MAP_RADIUS, -q + MAP_RADIUS);
+                const r1 = Math.max(-MAP_RADIUS, -q - MAP_RADIUS);
+                const r2 = Math.min(MAP_RADIUS, -q + MAP_RADIUS);
                 for (let r = r1; r <= r2; r++) {
                     const pos = axialToPixel(q, r);
-                    const spawnable = ['FOREST', 'MOUNTAIN', 'LAVA', 'WASTELAND'];
+                    const spawnable = store.spawnableTypes;
                     const typeKey = spawnable[Math.floor(Math.random() * spawnable.length)];
                     const number = Math.floor(Math.random() * 11) + 2;
+                    store.setMapTile({ q, r, typeKey, number });
 
                     const hex = createHex(pos.x, pos.y, q, r, typeKey, number);
                     gridContainer.add(hex.container);
@@ -258,21 +304,15 @@
             }
 
             const startPos = axialToPixel(0, 0);
-            player.sprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
-            player.sprite.add([
-                scene.add.circle(0, 0, 24, 0xffffff, 1).setStrokeStyle(3, 0x1e293b),
-                scene.add.text(0, 0, '👤', { fontSize: '26px' }).setOrigin(0.5)
+            playerSprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
+            playerSprite.add([
+                // scene.add.circle(0, 0, 24, 0xffffff, 1).setStrokeStyle(3, 0x1e293b),
+                scene.add.text(0, 0, '🦊', { fontSize: '36px' }).setOrigin(0.5)
             ]);
-            player.sprite.setDepth(100);
-            
-            highlightValidMoves();
-            updateUI();
+            playerSprite.setDepth(100);
 
-            scene.input.on('pointermove', (pointer) => {
-                const tooltip = document.getElementById('tooltip');
-                tooltip.style.left = (pointer.event.clientX + 15) + 'px';
-                tooltip.style.top = (pointer.event.clientY - 15) + 'px';
-            });
+            updateCurrentRollTileVisuals();
+
         }
 
         function createHex(x, y, q, r, typeKey, number) {
@@ -284,20 +324,15 @@
                 points.push(new Phaser.Math.Vector2(HEX_SIZE * Math.cos(angle), HEX_SIZE * Math.sin(angle)));
             }
 
-            const iconSprite = scene.add.image(0, 25, `icon_${typeKey}`).setScale(0.7).setOrigin(0.5, 0.5);
-            const numBg = scene.add.circle(0, -5, 13, 0x0f172a, 0.2);
-            const numText = scene.add.text(0, -5, number, { fontSize: '16px', fontStyle: 'bold', color: '#000000', alpha: 0.6 }).setOrigin(0.5);
+            const iconSprite = scene.add.image(0, 30, `icon_${typeKey}`).setScale(0.6).setOrigin(0.5, 0.5);
+            const numBg = scene.add.circle(0, -5, 13, 0x0f172a, 0.0);
+            const numText = scene.add.text(0, 0, number, { fontSize: '26px', fontStyle: 'bold', color: '#444', alpha: 0.6 }).setOrigin(0.5);
 
-            const hexData = { container, q, r, number, typeKey, graphics, iconSprite };
+            const hexData = { container, q, r, number, typeKey, graphics, iconSprite, numText, pulseTween: null, hoverTimeoutId: null, isHovering: false };
 
-            hexData.draw = (isHighlighted) => {
+            hexData.draw = () => {
                 graphics.clear();
-                let colorInt = TYPES[hexData.typeKey].color;
-                if (isHighlighted) {
-                    const c = Phaser.Display.Color.IntegerToColor(colorInt);
-                    c.lighten(15);
-                    colorInt = c.color;
-                }
+                let colorInt = store.tileTypes[hexData.typeKey].color;
                 graphics.fillStyle(colorInt, 1);
                 graphics.beginPath();
                 graphics.moveTo(points[0].x, points[0].y);
@@ -305,160 +340,249 @@
                 graphics.closePath();
                 graphics.fillPath();
                 iconSprite.setTexture(`icon_${hexData.typeKey}`);
+                const isNegativeTile = store.tileTypes[hexData.typeKey].effect.isPositive === false;
+                numText.setAlpha(isNegativeTile ? 0.2 : 1);
             };
 
-            hexData.draw(false);
+            hexData.draw();
             container.add([graphics, iconSprite, numBg, numText]);
 
             const poly = new Phaser.Geom.Polygon(points);
             graphics.setInteractive(poly, Phaser.Geom.Polygon.Contains);
 
             graphics.on('pointerover', () => {
-                scene.game.canvas.style.cursor = 'pointer';
-                const tooltip = document.getElementById('tooltip');
-                tooltip.innerHTML = `
-                    <div class="text-sm font-bold">
-                        ${TYPES[hexData.typeKey].name}: ${TYPES[hexData.typeKey].effect}. Если на кубике ${hexData.number}.
-                    </div>
-                    <div class="mt-1 text-[10px] text-blue-400 font-semibold uppercase tracking-tighter">Нажми, чтобы пойти</div>
-                `;
-                tooltip.style.display = 'block';
+                scene.input.setDefaultCursor('pointer');
+                hexData.isHovering = true;
+                if (hexData.hoverTimeoutId) {
+                    clearTimeout(hexData.hoverTimeoutId);
+                }
+                hexData.hoverTimeoutId = setTimeout(() => {
+                    if (!hexData.isHovering) return;
+                    const tileType = store.tileTypes[hexData.typeKey];
+                    const isNegativeTile = tileType.effect.isPositive === false;
+                    const message = isNegativeTile
+                        ? `Вы смотрите на ${tileType.name}:\nВы получите ${tileType.tooltipEffect} в любом случае`
+                        : `Вы смотрите на ${tileType.name}: ${tileType.tooltipEffect}. Если на кубике ${hexData.number}`;
+                    showNotification(
+                        message,
+                        "#60a5fa",
+                        4500
+                    );
+                    hexData.hoverTimeoutId = null;
+                }, HOVER_HINT_DELAY_MS);
             });
 
             graphics.on('pointerout', () => {
-                scene.game.canvas.style.cursor = 'default';
-                document.getElementById('tooltip').style.display = 'none';
+                scene.input.setDefaultCursor('default');
+                hexData.isHovering = false;
+                if (hexData.hoverTimeoutId) {
+                    clearTimeout(hexData.hoverTimeoutId);
+                    hexData.hoverTimeoutId = null;
+                }
             });
 
             graphics.on('pointerdown', () => {
-                if (document.getElementById('start-screen').style.display !== 'none') return;
-                if (!player.isMoving && isNeighbor(player.q, player.r, q, r)) {
+                resetIdleHintTimer();
+                if (!store.gameStarted || playerIsMoving || store.health <= 0 || store.gold >= 100) return;
+                if (isNeighbor(store.playerPosition.q, store.playerPosition.r, q, r)) {
                     movePlayer(q, r);
                 }
             });
 
-            hexData.highlight = (active) => hexData.draw(active);
             return hexData;
         }
 
-        function rollDiceValue() { return (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1); }
-        function axialToPixel(q, r) { return { x: HEX_SIZE * Math.sqrt(3) * (q + r / 2), y: HEX_SIZE * 1.5 * r }; }
-        function isNeighbor(q1, r1, q2, r2) {
-            const dq = q2 - q1, dr = r2 - r1;
-            return [[1,0], [1,-1], [0,-1], [-1,0], [-1,1], [0,1]].some(n => n[0] === dq && n[1] === dr);
+        function rollDiceValue() {
+            return (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1);
         }
 
-        function movePlayer(tQ, tR) {
-            player.isMoving = true;
-            Object.values(hexGrid).forEach(h => h.highlight(false));
-            const pos = axialToPixel(tQ, tR);
+        function axialToPixel(q, r) {
+            return { x: HEX_SIZE * Math.sqrt(3) * (q + r / 2), y: HEX_SIZE * 1.5 * r };
+        }
+
+        function isNeighbor(q1, r1, q2, r2) {
+            const dq = q2 - q1;
+            const dr = r2 - r1;
+            return [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]].some((n) => n[0] === dq && n[1] === dr);
+        }
+
+        function movePlayer(targetQ, targetR) {
+            playerIsMoving = true;
+            const pos = axialToPixel(targetQ, targetR);
             scene.tweens.add({
-                targets: player.sprite,
+                targets: playerSprite,
                 x: gridContainer.x + pos.x,
                 y: gridContainer.y + pos.y,
                 duration: 400,
-                onComplete: () => { player.q = tQ; player.r = tR; executeTurn(); }
+                onComplete: () => {
+                    store.setPlayerPosition(targetQ, targetR);
+                    executeTurn();
+                }
             });
         }
 
-        function highlightValidMoves() {
-            Object.values(hexGrid).forEach(hex => hex.highlight(isNeighbor(player.q, player.r, hex.q, hex.r)));
-        }
+        function updateCurrentRollTileVisuals() {
+            const currentRoll = store.diceRolls[0];
+            Object.values(hexGrid).forEach((hex) => {
+                const isMatch = currentRoll !== undefined && hex.number === currentRoll;
 
-        function updateDiceUI() {
-            document.getElementById('dice-val').innerText = `🎲 ${diceQueue[0]}`;
-            document.getElementById('next-1').innerText = diceQueue[1];
-            document.getElementById('next-2').innerText = diceQueue[2];
+                if (isMatch && !hex.pulseTween) {
+                    hex.pulseTween = scene.tweens.add({
+                        targets: hex.graphics,
+                        alpha: 0.75,
+                        duration: 1000,
+                        yoyo: true,
+                        repeat: 3
+                    });
+                }
+
+                if (isMatch) {
+                    hex.iconSprite.setTint(0x111111);
+                    hex.iconSprite.setAlpha(1);
+                } else {
+                    hex.iconSprite.clearTint();
+                    hex.iconSprite.setAlpha(0.85);
+                }
+
+                if (!isMatch && hex.pulseTween) {
+                    hex.pulseTween.stop();
+                    hex.pulseTween = null;
+                    hex.graphics.setAlpha(1);
+                }
+            });
         }
 
         function executeTurn() {
-            const roll = diceQueue.shift();
-            diceQueue.push(rollDiceValue());
-            updateDiceUI();
+            const roll = store.consumeDiceRoll();
+            if (roll === null) return;
+            store.incrementTurns();
+            store.adjustHealth(-5);
+            updateCurrentRollTileVisuals();
+            resetIdleHintTimer();
 
-            const tile = hexGrid[`${player.q},${player.r}`];
-            let resMsg = "Нет события";
-            let resColor = "#94a3b8";
+            const tile = store.currentTile;
+            let resultMessage = "Нет события";
+            let resultColor = "#94a3b8";
 
-            Object.values(hexGrid).forEach(h => { 
-                if(h.number === roll) scene.tweens.add({ targets: h.container, scale: 1.1, yoyo: true, duration: 200 })
-            });
-
-            if (tile.number === roll) {
-                const eff = applyEffect(tile.typeKey);
-                resMsg = `${eff.name}: ${eff.desc}`;
-                resColor = eff.isPositive ? "#22c55e" : "#ef4444";
-                showNotification(resMsg, resColor, 4000);
+            if (tile) {
+                const isNegativeTile = store.tileTypes[tile.typeKey].effect.isPositive === false;
+                const shouldApplyEffect = isNegativeTile || tile.number === roll;
+                if (shouldApplyEffect) {
+                    const eff = store.applyEffect(tile.typeKey);
+                    resultMessage = `${eff.name}: ${eff.desc}`;
+                    resultColor = eff.isPositive ? "#22c55e" : "#ef4444";
+                    showNotification(resultMessage, resultColor, 4000);
+                }
             }
 
-            const nextType = UPGRADE_PATH[tile.typeKey];
-            if (nextType && player.money >= 50) {
-                showNotification(`Можно улучшить до ${TYPES[nextType].name.toLowerCase()} (50 золота)`, "#f59e0b", 4000);
+            const nextType = tile ? store.upgradePath[tile.typeKey] : null;
+            if (nextType && store.gold >= 50) {
+                showNotification(`Можно улучшить до ${store.tileTypes[nextType].name.toLowerCase()} (50 золота)`, "#f59e0b", 4000);
             }
 
-            addLog(`🎲:${roll} | Клетка:${tile.number} | ${resMsg}`);
-            updateUI();
-            if (player.food > 0 && player.money < 100) { player.isMoving = false; highlightValidMoves(); }
-            else checkGameOver();
+            const tileNumber = tile ? tile.number : '-';
+            store.addJournal(`🎲:${roll} | Клетка:${tileNumber} | ${resultMessage}`);
+
+            playerIsMoving = false;
         }
 
-        function applyEffect(key) {
-            const t = TYPES[key];
-            let d = ""; let isPositive = true;
-            if (key === 'LAVA') { player.food -= 50; d = "-50 здоровья"; isPositive = false; }
-            if (key === 'WASTELAND') { player.money = Math.max(0, player.money - 15); d = "-15 золота"; isPositive = false; }
-            if (key === 'FOREST' || key === 'FIELD') { player.food += 10; d = "+10 здоровья"; }
-            if (key === 'MOUNTAIN') { player.money += 15; d = "+15 золота"; }
-            if (key === 'VILLAGE') { player.food += 10; player.money += 15; d = "+10/+15"; }
-            if (key === 'CITY') { player.money += 30; d = "+30 золота"; }
-            return { name: t.name, desc: d, isPositive };
-        }
+        function buildUpgradeAction() {
+            const tile = store.currentTile;
+            if (!tile) return;
+            const nextType = store.upgradePath[tile.typeKey];
+            if (!nextType) return;
+            if (!store.spendGold(50)) return;
 
-        function buildUpgrade() {
-            const currentTile = hexGrid[`${player.q},${player.r}`];
-            const nextType = UPGRADE_PATH[currentTile.typeKey];
-            if (player.money >= 50 && nextType) {
-                player.money -= 50;
-                currentTile.typeKey = nextType;
-                currentTile.draw(false);
-                showNotification(`🔨 Улучшено до ${TYPES[nextType].name}!`, "#f59e0b", 3000);
-                updateUI();
-                highlightValidMoves();
+            store.setTileType(tile.q, tile.r, nextType);
+            const visual = hexGrid[`${tile.q},${tile.r}`];
+            if (visual) {
+                visual.typeKey = nextType;
+                visual.draw();
             }
-        }
-
-        function updateUI() {
-            document.getElementById('food-val').innerText = player.food;
-            document.getElementById('money-val').innerText = player.money;
-            const btn = document.getElementById('btn-build');
-            const currentTile = hexGrid[`${player.q},${player.r}`];
-            const canUpgrade = currentTile && UPGRADE_PATH[currentTile.typeKey];
-            btn.disabled = (player.money < 50 || !canUpgrade);
-        }
-
-        function addLog(t) {
-            const l = document.getElementById('log-content');
-            const d = document.createElement('div');
-            d.className = "py-0.5 border-b border-white/5 text-slate-400";
-            d.innerHTML = `› ${t}`;
-            l.prepend(d);
-        }
-
-        function checkGameOver() {
-            const screen = document.getElementById('win-screen');
-            const title = document.getElementById('win-title');
-            if (player.food <= 0) { 
-                title.innerText = "СМЕРТЬ"; title.className = "text-4xl font-black text-red-500 mb-2 italic";
-                document.getElementById('win-msg').innerText = "Здоровье закончилось.";
-                screen.classList.remove('hidden'); screen.classList.add('flex');
-            } else if (player.money >= 100) {
-                title.innerText = "ПОБЕДА"; title.className = "text-4xl font-black text-yellow-500 mb-2 italic";
-                document.getElementById('win-msg').innerText = "Вы накопили 100 золота!";
-                screen.classList.remove('hidden'); screen.classList.add('flex');
-            }
+            showNotification(`🔨 Улучшено до ${store.tileTypes[nextType].name}!`, "#f59e0b", 3000);
         }
 
         function update() {}
+
+        const app = createApp({
+            setup() {
+                const gameStore = useGameStore();
+                const logCollapsed = ref(false);
+
+                const winState = computed(() => {
+                    if (gameStore.health <= 0) {
+                        return { title: 'СМЕРТЬ', message: 'Здоровье закончилось.', colorClass: 'text-red-500' };
+                    }
+                    if (gameStore.gold >= 100) {
+                        return { title: 'ПОБЕДА', message: 'Вы накопили 100 золота!', colorClass: 'text-yellow-500' };
+                    }
+                    return null;
+                });
+
+                const nextType = computed(() => {
+                    if (!gameStore.currentTile) return null;
+                    return gameStore.upgradePath[gameStore.currentTile.typeKey] || null;
+                });
+                const missingGold = computed(() => Math.max(0, 50 - gameStore.gold));
+                const showShortage = computed(() => Boolean(nextType.value) && missingGold.value > 0);
+                const canUpgrade = computed(() => Boolean(nextType.value) && missingGold.value === 0 && gameStore.gameStarted && !winState.value);
+                const upgradeLabel = computed(() => {
+                    if (!nextType.value) return 'Нельзя улучшить';
+                    return `Превратить в ${gameStore.tileTypes[nextType.value].name} (🧈50)`;
+                });
+
+                function startGame() {
+                    if (gameStore.gameStarted) return;
+                    gameStore.gameStarted = true;
+                    showNotification("Выберите поле, чтобы переместиться.\nДля начала разыщите золото в горах!", "#3b82f6", 5000);
+                    resetIdleHintTimer();
+                }
+
+                function toggleLog() {
+                    logCollapsed.value = !logCollapsed.value;
+                    resetIdleHintTimer();
+                }
+
+                function buildUpgrade() {
+                    buildUpgradeAction();
+                    resetIdleHintTimer();
+                }
+
+                return {
+                    store: gameStore,
+                    logCollapsed,
+                    winState,
+                    missingGold,
+                    showShortage,
+                    canUpgrade,
+                    upgradeLabel,
+                    startGame,
+                    toggleLog,
+                    buildUpgrade
+                };
+            }
+        });
+
+        const pinia = createPinia();
+        app.use(pinia);
+        app.mount('#app');
+
+        store = useGameStore(pinia);
+        document.addEventListener('pointerdown', () => {
+            if (!store || !store.gameStarted) return;
+            resetIdleHintTimer();
+        });
+
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'game-container',
+            backgroundColor: '#0f172a',
+            scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
+            scene: { preload, create, update }
+        };
+
         const gameInstance = new Phaser.Game(config);
     </script>
 </body>
