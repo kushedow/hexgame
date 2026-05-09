@@ -154,10 +154,10 @@
                 tileTypes: {
                     LAVA: { color: 0xDB9966, name: 'Лава', tooltipEffect: 'здоровье -50', effect: { health: -50, gold: 0, description: '-50 здоровья', isPositive: false } },
                     WASTELAND: { color: 0xF0F0F0, name: 'Пустошь', tooltipEffect: 'золото -15', effect: { health: 0, gold: -15, description: '-15 золота', isPositive: false } },
-                    FIELD: { color: 0xBBCDB6, name: 'Поле', tooltipEffect: 'здоровье +10', effect: { health: 10, gold: 0, description: '+10 здоровья', isPositive: true } },
+                    FIELD: { color: 0xBBCDB6, name: 'Поле', tooltipEffect: 'здоровье +20', effect: { health: 15, gold: 0, description: '+15 здоровья', isPositive: true } },
                     VILLAGE: { color: 0xFCE7A1, name: 'Деревня', tooltipEffect: 'здоровье +10, золото +15', effect: { health: 10, gold: 15, description: '+10/+15', isPositive: true } },
                     CITY: { color: 0xF2B755, name: 'Город', tooltipEffect: 'золото +30', effect: { health: 0, gold: 30, description: '+30 золота', isPositive: true } },
-                    FOREST: { color: 0x99A68F, name: 'Лес', tooltipEffect: 'здоровье +10', effect: { health: 10, gold: 0, description: '+10 здоровья', isPositive: true } },
+                    FOREST: { color: 0x99A68F, name: 'Лес', tooltipEffect: 'здоровье +15', effect: { health: 15, gold: 0, description: '+15 здоровья', isPositive: true } },
                     MOUNTAIN: { color: 0xECE3D4, name: 'Горы', tooltipEffect: 'золото +15', effect: { health: 0, gold: 15, description: '+15 золота', isPositive: true } }
                 },
                 upgradePath: {
@@ -287,21 +287,50 @@
 
             store.initializeDice();
 
+            const coords = [];
             for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
                 const r1 = Math.max(-MAP_RADIUS, -q - MAP_RADIUS);
                 const r2 = Math.min(MAP_RADIUS, -q + MAP_RADIUS);
                 for (let r = r1; r <= r2; r++) {
-                    const pos = axialToPixel(q, r);
-                    const spawnable = store.spawnableTypes;
-                    const typeKey = spawnable[Math.floor(Math.random() * spawnable.length)];
-                    const number = Math.floor(Math.random() * 11) + 2;
-                    store.setMapTile({ q, r, typeKey, number });
-
-                    const hex = createHex(pos.x, pos.y, q, r, typeKey, number);
-                    gridContainer.add(hex.container);
-                    hexGrid[`${q},${r}`] = hex;
+                    coords.push({ q, r });
                 }
             }
+
+            const lavaCandidates = coords.filter((c) => !(c.q === 0 && c.r === 0));
+            const lavaTile = lavaCandidates[Math.floor(Math.random() * lavaCandidates.length)] || coords[0];
+            const nonLavaCoords = coords.filter((c) => c !== lavaTile);
+
+            const forestCount = Math.min(nonLavaCoords.length, MAP_RADIUS + 2);
+            const fieldCount = Math.min(nonLavaCoords.length - forestCount, MAP_RADIUS + 4);
+            const mountainCount = Math.min(nonLavaCoords.length - forestCount - fieldCount, MAP_RADIUS + 1);
+            const wastelandCount = nonLavaCoords.length - forestCount - fieldCount - mountainCount;
+
+            const typePool = [
+                ...Array(forestCount).fill('FOREST'),
+                ...Array(fieldCount).fill('FIELD'),
+                ...Array(mountainCount).fill('MOUNTAIN'),
+                ...Array(wastelandCount).fill('WASTELAND')
+            ];
+            shuffleInPlace(typePool);
+
+            const numberPool = buildNumberPool(nonLavaCoords.length);
+
+            nonLavaCoords.forEach((coord, index) => {
+                coord.typeKey = typePool[index] || 'WASTELAND';
+                coord.number = numberPool[index];
+            });
+
+            lavaTile.typeKey = 'LAVA';
+            lavaTile.number = 1;
+
+            shuffleInPlace(coords);
+            coords.forEach((coord) => {
+                const pos = axialToPixel(coord.q, coord.r);
+                store.setMapTile({ q: coord.q, r: coord.r, typeKey: coord.typeKey, number: coord.number });
+                const hex = createHex(pos.x, pos.y, coord.q, coord.r, coord.typeKey, coord.number);
+                gridContainer.add(hex.container);
+                hexGrid[`${coord.q},${coord.r}`] = hex;
+            });
 
             const startPos = axialToPixel(0, 0);
             playerSprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
@@ -394,6 +423,38 @@
 
         function rollDiceValue() {
             return (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1);
+        }
+
+        function shuffleInPlace(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+            return arr;
+        }
+
+        function buildNumberPool(totalCount) {
+            const repeated = [];
+            for (let n = 2; n <= 12; n++) {
+                for (let i = 0; i < MAP_RADIUS; i++) {
+                    repeated.push(n);
+                }
+            }
+            shuffleInPlace(repeated);
+            if (repeated.length >= totalCount) {
+                return repeated.slice(0, totalCount);
+            }
+
+            const pool = repeated.slice();
+            let cycle = 2;
+            while (pool.length < totalCount) {
+                pool.push(cycle);
+                cycle = cycle === 12 ? 2 : cycle + 1;
+            }
+            shuffleInPlace(pool);
+            return pool;
         }
 
         function axialToPixel(q, r) {
