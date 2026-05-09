@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hex Strategy Mobile</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        #game-wrapper { position: relative; width: 100%; max-width: 800px; height: 100%; max-height: 600px; display: flex; justify-content: center; align-items: center; }
+        #game-container { border-radius: 12px; overflow: hidden; border: 2px solid #334155; width: 100%; height: 100%; position: relative; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; padding: 10px; color: white; z-index: 10; }
+        .stat-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 12px; border: 1px solid #475569; pointer-events: auto; }
+        
+        #log-container { position: absolute; bottom: 15px; left: 15px; width: 280px; transition: all 0.3s ease; z-index: 20; pointer-events: auto; }
+        #log { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); border-radius: 12px; border: 1px solid #334155; overflow: hidden; display: flex; flex-direction: column; }
+        #log-header { padding: 8px 12px; background: rgba(30, 41, 59, 0.5); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        #log-content { max-height: 120px; overflow-y: auto; padding: 10px; transition: max-height 0.3s ease; }
+        .log-collapsed #log-content { max-height: 0; padding-top: 0; padding-bottom: 0; }
+        
+        #action-panel { position: absolute; bottom: 15px; right: 15px; pointer-events: auto; z-index: 20; }
+        .btn-label { display: inline; }
+        @media (max-width: 640px) {
+            .btn-label { display: none; }
+            #btn-build { width: 56px; height: 56px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+            #log-container { width: calc(100% - 100px); }
+        }
+
+        #tooltip { position: fixed; pointer-events: none; z-index: 1000; background: rgba(15, 23, 42, 0.95); border: 1px solid #475569; color: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; display: none; }
+        
+        .overlay-screen { position: absolute; inset: 0; background: rgba(2, 6, 23, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; padding: 2rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div id="game-container">
+            <div id="start-screen" class="overlay-screen">
+                <div class="max-w-md">
+                    <h1 class="text-4xl font-black text-white mb-6 tracking-tight italic">HEX STRATEGY</h1>
+                    <div class="text-slate-300 space-y-4 mb-8 text-sm leading-relaxed">
+                        <p>Перемещайтесь по игровому полю и собирайте золото и еду с активных клеток.</p>
+                        <p>Справа наверху есть кубик. Если на нем выпало <span class="text-purple-400 font-bold">6</span> — шагните на клетку с цифрой <span class="text-purple-400 font-bold">6</span>, и она активируется. Следующие два броска кубика также предсказаны.</p>
+                        <p>Ваша цель — заработать <span class="text-yellow-500 font-bold">100 золота</span>. Для этого добывайте золото в горах и стройте деревни.</p>
+                    </div>
+                    <button onclick="startGame()" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg shadow-blue-900/20 transition-all">
+                        Начать
+                    </button>
+                </div>
+            </div>
+
+            <div id="ui-layer">
+                <div class="flex justify-between items-start w-full">
+                    <div class="flex space-x-2">
+                        <div class="stat-card border-b-2 border-red-500">
+                            <div class="text-[10px] uppercase font-bold opacity-50">Еда</div>
+                            <div id="food-val" class="text-lg font-black text-red-500">100</div>
+                        </div>
+                        <div class="stat-card border-b-2 border-yellow-500">
+                            <div class="text-[10px] uppercase font-bold opacity-50">Золото</div>
+                            <div id="money-val" class="text-lg font-black text-yellow-500">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card flex flex-col items-center border-b-2 border-purple-500">
+                        <div id="dice-val" class="text-2xl font-black text-purple-400">🎲 --</div>
+                        <div class="flex space-x-2 mt-1">
+                            <div id="next-1" class="prediction-badge text-purple-300">?</div>
+                            <div id="next-2" class="prediction-badge text-purple-400/50">?</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="log-container">
+                <div id="log">
+                    <div id="log-header" onclick="toggleLog()">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-blue-400">Журнал</span>
+                        <span id="log-toggle-icon">▼</span>
+                    </div>
+                    <div id="log-content" class="space-y-1 text-slate-400 text-xs"></div>
+                </div>
+            </div>
+            
+            <div id="action-panel">
+                <button onclick="buildVillage()" id="btn-build" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all border border-amber-400 disabled:opacity-50">
+                    <span class="btn-label text-sm">Построить деревню (50)</span>
+                    <span class="sm:hidden text-2xl">🔨</span>
+                </button>
+            </div>
+
+            <div id="win-screen" class="hidden overlay-screen">
+                <h1 id="win-title" class="text-4xl font-black mb-2 italic"></h1>
+                <p id="win-msg" class="text-slate-400 mb-8"></p>
+                <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold">Заново</button>
+            </div>
+
+            <div id="tooltip"></div>
+        </div>
+    </div>
+
+    <script>
+        const MAP_RADIUS = 2;
+        const HEX_SIZE = 55;
+        
+        const TYPES = {
+            FOREST:    { color: 0x22c55e, name: 'Лес', effect: 'еда +10' },
+            FIELD:     { color: 0x84cc16, name: 'Поле', effect: 'еда +10' },
+            SWAMP:     { color: 0x3f6212, name: 'Болото', effect: 'еда -15' },
+            WASTELAND: { color: 0x64748b, name: 'Пустошь', effect: 'золото -15' },
+            MOUNTAIN:  { color: 0x94a3b8, name: 'Горы', effect: 'золото +15' },
+            VILLAGE:   { color: 0xf59e0b, name: 'Деревня', effect: 'еда +10, золото +15' }
+        };
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#0f172a',
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            scene: { preload, create, update }
+        };
+
+        let player = { food: 100, money: 0, q: 0, r: 0, sprite: null, isMoving: false };
+        let hexGrid = {};
+        let gridContainer;
+        let scene;
+        let diceQueue = [];
+        let gameInstance = null;
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+        }
+
+        function toggleLog() {
+            const container = document.getElementById('log-container');
+            const icon = document.getElementById('log-toggle-icon');
+            container.classList.toggle('log-collapsed');
+            icon.innerText = container.classList.contains('log-collapsed') ? '▲' : '▼';
+        }
+
+        function preload() {}
+
+        function create() {
+            scene = this;
+            gridContainer = this.add.container(400, 300);
+
+            // Инициализируем очередь бросков
+            for(let i = 0; i < 3; i++) diceQueue.push(rollDiceValue());
+            
+            // Теперь сразу обновляем UI кубика значением diceQueue[0]
+            updateDiceUI(false); 
+
+            for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
+                let r1 = Math.max(-MAP_RADIUS, -q - MAP_RADIUS);
+                let r2 = Math.min(MAP_RADIUS, -q + MAP_RADIUS);
+                for (let r = r1; r <= r2; r++) {
+                    const pos = axialToPixel(q, r);
+                    const filteredKeys = Object.keys(TYPES).filter(k => k !== 'VILLAGE'); 
+                    const typeKey = filteredKeys[Math.floor(Math.random() * filteredKeys.length)];
+                    const number = Math.floor(Math.random() * 11) + 2;
+
+                    const hex = createHex(pos.x, pos.y, q, r, typeKey, number);
+                    gridContainer.add(hex.container);
+                    hexGrid[`${q},${r}`] = hex;
+                }
+            }
+
+            const startPos = axialToPixel(0, 0);
+            player.sprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
+            player.sprite.add([
+                scene.add.circle(0, 0, 24, 0xffffff, 1).setStrokeStyle(3, 0x1e293b),
+                scene.add.text(0, 0, '👤', { fontSize: '26px' }).setOrigin(0.5)
+            ]);
+            player.sprite.setDepth(100);
+            
+            highlightValidMoves();
+            updateUI();
+
+            scene.input.on('pointermove', (pointer) => {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.style.left = (pointer.event.clientX + 10) + 'px';
+                tooltip.style.top = (pointer.event.clientY - 40) + 'px';
+            });
+        }
+
+        function createHex(x, y, q, r, typeKey, number) {
+            const container = scene.add.container(x, y);
+            const graphics = scene.add.graphics();
+            const points = [];
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 180) * (60 * i - 30);
+                points.push(new Phaser.Math.Vector2(HEX_SIZE * Math.cos(angle), HEX_SIZE * Math.sin(angle)));
+            }
+
+            const hexData = { container, q, r, number, typeKey };
+
+            const drawHex = (isHighlighted) => {
+                graphics.clear();
+                graphics.lineStyle(1, 0x334155, 1);
+                let colorInt = TYPES[hexData.typeKey].color;
+                if (isHighlighted) {
+                    const c = Phaser.Display.Color.IntegerToColor(colorInt);
+                    c.lighten(30);
+                    colorInt = c.color;
+                }
+                graphics.fillStyle(colorInt, 0.85);
+                graphics.beginPath();
+                graphics.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < 6; i++) graphics.lineTo(points[i].x, points[i].y);
+                graphics.closePath();
+                graphics.fillPath();
+                graphics.strokePath();
+            };
+
+            drawHex(false);
+            container.add([graphics, scene.add.circle(0, 0, 13, 0x0f172a, 0.5), scene.add.text(0, 0, number, { fontSize: '15px', fontStyle: 'bold' }).setOrigin(0.5)]);
+
+            const poly = new Phaser.Geom.Polygon(points);
+            graphics.setInteractive(poly, Phaser.Geom.Polygon.Contains);
+
+            graphics.on('pointerdown', (pointer) => {
+                if (document.getElementById('start-screen').style.display !== 'none') return;
+
+                const tooltip = document.getElementById('tooltip');
+                tooltip.innerText = `${TYPES[hexData.typeKey].name}: ${TYPES[hexData.typeKey].effect}`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (pointer.event.clientX) + 'px';
+                tooltip.style.top = (pointer.event.clientY - 50) + 'px';
+                
+                if (!player.isMoving && isNeighbor(player.q, player.r, q, r)) {
+                    movePlayer(q, r);
+                }
+            });
+
+            graphics.on('pointerout', () => {
+                document.getElementById('tooltip').style.display = 'none';
+            });
+
+            hexData.highlight = (active) => drawHex(active);
+            return hexData;
+        }
+
+        function rollDiceValue() { return (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1); }
+        function axialToPixel(q, r) { return { x: HEX_SIZE * Math.sqrt(3) * (q + r / 2), y: HEX_SIZE * 1.5 * r }; }
+        function isNeighbor(q1, r1, q2, r2) {
+            const dq = q2 - q1, dr = r2 - r1;
+            return [[1,0], [1,-1], [0,-1], [-1,0], [-1,1], [0,1]].some(n => n[0] === dq && n[1] === dr);
+        }
+
+        function movePlayer(tQ, tR) {
+            player.isMoving = true;
+            Object.values(hexGrid).forEach(h => h.highlight(false));
+            const pos = axialToPixel(tQ, tR);
+            scene.tweens.add({
+                targets: player.sprite,
+                x: gridContainer.x + pos.x,
+                y: gridContainer.y + pos.y,
+                duration: 400,
+                onComplete: () => { player.q = tQ; player.r = tR; executeTurn(); }
+            });
+        }
+
+        function highlightValidMoves() {
+            Object.values(hexGrid).forEach(hex => hex.highlight(isNeighbor(player.q, player.r, hex.q, hex.r)));
+        }
+
+        function updateDiceUI(isInit = false) {
+            // Убираем условие isInit для основного кубика, чтобы он всегда выводил diceQueue[0]
+            document.getElementById('dice-val').innerText = `🎲 ${diceQueue[0]}`;
+            document.getElementById('next-1').innerText = diceQueue[1];
+            document.getElementById('next-2').innerText = diceQueue[2];
+        }
+
+        function executeTurn() {
+            const roll = diceQueue.shift();
+            diceQueue.push(rollDiceValue());
+            updateDiceUI();
+
+            const tile = hexGrid[`${player.q},${player.r}`];
+            let resMsg = "Нет события";
+            let resCol = "text-slate-500";
+
+            Object.values(hexGrid).forEach(h => { if(h.number === roll) scene.tweens.add({ targets: h.container, scale: 1.2, yoyo: true, duration: 200 })});
+
+            if (tile.number === roll) {
+                const eff = applyEffect(tile.typeKey);
+                resMsg = `${eff.name}: ${eff.desc}`;
+                resCol = "text-white font-bold bg-slate-800 px-1 rounded";
+            }
+
+            addLog(`🎲:${roll} | Клетка:${tile.number} | ${resMsg}`, resCol);
+            updateUI();
+            if (player.food > 0 && player.money < 100) { player.isMoving = false; highlightValidMoves(); }
+            else checkGameOver();
+        }
+
+        function applyEffect(key) {
+            const t = TYPES[key];
+            let d = "";
+            if (key === 'FOREST' || key === 'FIELD') { player.food += 10; d = "+10 еды"; }
+            if (key === 'SWAMP') { player.food -= 15; d = "-15 еды"; }
+            if (key === 'WASTELAND') { player.money = Math.max(0, player.money - 15); d = "-15 золота"; }
+            if (key === 'MOUNTAIN') { player.money += 15; d = "+15 золота"; }
+            if (key === 'VILLAGE') { player.food += 10; player.money += 15; d = "+10/+15"; }
+            return { name: t.name, desc: d };
+        }
+
+        function buildVillage() {
+            const currentTile = hexGrid[`${player.q},${player.r}`];
+            if (player.money >= 50 && currentTile.typeKey !== 'VILLAGE') {
+                player.money -= 50;
+                currentTile.typeKey = 'VILLAGE';
+                currentTile.highlight(false);
+                addLog(`🔨 Построена деревня!`, "text-amber-400 font-bold");
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('food-val').innerText = player.food;
+            document.getElementById('money-val').innerText = player.money;
+            const btn = document.getElementById('btn-build');
+            const currentTile = hexGrid[`${player.q},${player.r}`];
+            btn.disabled = (player.money < 50 || currentTile?.typeKey === 'VILLAGE');
+        }
+
+        function addLog(t, cl) {
+            const l = document.getElementById('log-content');
+            const d = document.createElement('div');
+            d.className = `py-0.5 border-b border-white/5 ${cl}`;
+            d.innerHTML = `› ${t}`;
+            l.prepend(d);
+        }
+
+        function checkGameOver() {
+            const screen = document.getElementById('win-screen');
+            const title = document.getElementById('win-title');
+            if (player.food <= 0) { 
+                title.innerText = "ГОЛОД"; title.className = "text-4xl font-black text-red-500 mb-2 italic";
+                document.getElementById('win-msg').innerText = "Запасы еды иссякли.";
+                screen.classList.remove('hidden'); screen.classList.add('flex');
+            } else if (player.money >= 100) {
+                title.innerText = "ПОБЕДА"; title.className = "text-4xl font-black text-yellow-500 mb-2 italic";
+                document.getElementById('win-msg').innerText = "Вы накопили 100 золота!";
+                screen.classList.remove('hidden'); screen.classList.add('flex');
+            }
+        }
+
+        function update() {}
+        
+        gameInstance = new Phaser.Game(config);
+    </script>
+</body>
+</html>
