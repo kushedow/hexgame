@@ -24,6 +24,15 @@
             transition: all 0.5s ease;
         }
 
+        .food-low-warning {
+            animation: foodLowBlink 0.75s ease-in-out infinite;
+        }
+
+        @keyframes foodLowBlink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(1.08); }
+        }
+
     </style>
 </head>
 <body class="m-0 bg-slate-900 h-screen overflow-hidden touch-none flex justify-center items-center font-['Segoe_UI',sans-serif]">
@@ -83,7 +92,7 @@
                         <!-- Еда -->
                         <div class=" items-center">
 
-                            <div id="food-val" class="text-4xl font-black text-red-500 leading-none mt-1"> {{ store.health }}<sup class="text-md">💛</sup></div>
+                            <div id="food-val" class="text-4xl font-black text-red-500 leading-none mt-1" :class="{ 'food-low-warning': store.health < 20 && store.health > 0 }"> {{ store.health }}<sup class="text-md">💛</sup></div>
                         </div>
                         <!-- Золото -->
                         <div class="flex flex-col items-center">
@@ -204,6 +213,7 @@
                 },
                 turns: 0,
                 hoveredTerrainKey: null,
+                lowFoodWarningShown: false,
                 gameStarted: false
             }),
             getters: {
@@ -212,8 +222,8 @@
                 }
             },
             actions: {
-                initializeDice() {
-                    this.diceRolls = [rollDiceValue(), rollDiceValue(), rollDiceValue()];
+                initializeDice(firstRoll = rollDiceValue()) {
+                    this.diceRolls = [firstRoll, rollDiceValue(), rollDiceValue()];
                 },
                 consumeDiceRoll() {
                     if (!this.diceRolls.length) return null;
@@ -234,6 +244,9 @@
                 },
                 adjustHealth(delta) {
                     this.health += delta;
+                    if (this.health >= 20) {
+                        this.lowFoodWarningShown = false;
+                    }
                 },
                 adjustGold(delta) {
                     this.gold = Math.max(0, this.gold + delta);
@@ -295,11 +308,16 @@
             }, duration);
         }
 
+        function checkLowFoodWarning() {
+            if (!store.gameStarted || store.health <= 0 || store.health >= 20 || store.lowFoodWarningShown) return;
+            store.lowFoodWarningShown = true;
+            showNotification("Еда заканчивается! Ищите ее в поле и лесу!", "#ef4444", 4000);
+        }
+
         function create() {
             scene = this;
             gridContainer = this.add.container(scene.scale.width / 2, scene.scale.height / 2);
 
-            store.initializeDice();
             const coords = [];
 
             for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
@@ -320,6 +338,8 @@
                 gridContainer.add(hex.container);
                 hexGrid[`${coord.q},${coord.r}`] = hex;
             });
+
+            store.initializeDice(findNearestFoodTileNumber());
 
             const startPos = axialToPixel(0, 0);
             playerSprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
@@ -425,6 +445,25 @@
             return { x: HEX_SIZE * Math.sqrt(3) * (q + r / 2), y: HEX_SIZE * 1.5 * r };
         }
 
+        function axialDistance(q1, r1, q2, r2) {
+            return (Math.abs(q1 - q2) + Math.abs(q1 + r1 - q2 - r2) + Math.abs(r1 - r2)) / 2;
+        }
+
+        function findNearestFoodTileNumber() {
+            const { q, r } = store.playerPosition;
+            const foodTiles = Object.values(store.map).filter((tile) => {
+                const isCurrentTile = tile.q === q && tile.r === r;
+                const givesFood = (store.tileTypes[tile.typeKey]?.effect?.health || 0) > 0;
+                return givesFood && !isCurrentTile;
+            });
+            const nearbyFoodTiles = foodTiles.filter((tile) => isNeighbor(q, r, tile.q, tile.r));
+            const candidates = nearbyFoodTiles.length ? nearbyFoodTiles : foodTiles;
+
+            candidates.sort((a, b) => axialDistance(q, r, a.q, a.r) - axialDistance(q, r, b.q, b.r));
+
+            return candidates[0]?.number || rollDiceValue();
+        }
+
         function isNeighbor(q1, r1, q2, r2) {
             const dq = q2 - q1;
             const dr = r2 - r1;
@@ -498,6 +537,8 @@
                     showNotification(resultMessage, resultColor, 4000);
                 }
             }
+
+            checkLowFoodWarning();
 
             const nextType = tile ? (store.tileTypes[tile.typeKey]?.upgradeTo || null) : null;
             if (nextType && store.gold >= 50) {
@@ -573,7 +614,8 @@
                 function startGame() {
                     if (gameStore.gameStarted) return;
                     gameStore.gameStarted = true;
-                    showNotification("Приключение начинатся.\nДля начала разыщите еду в поле или лесу, затем добывайте золото в горах и улучшайте клетки!", "#3b82f6", 5000);
+                    showNotification(`Приключение начинается!
+Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`, "#3b82f6", 5000);
                 }
 
                 function buildUpgrade() {
