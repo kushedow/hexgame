@@ -51,9 +51,17 @@
                         <p>Добывайте еду в лесу и в поле, золото в горах. Когда ваши аппетиты вырастут превратите поле в деревню, а деревню в город. Даже опасный вулкан можно превратить в уютные горы. Все ради золота, разумеется!</p>
 
                     </div>
-                    <button @click="startGame" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg shadow-blue-900/20 transition-all">
-                        Начать игру
-                    </button>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button
+                            v-for="mode in gameModesList"
+                            :key="mode.key"
+                            @click="startGame(mode.key)"
+                            class="bg-amber-400 hover:bg-amber-500  px-5 py-3 rounded-xl   shadow-lg shadow-blue-900/20 transition-all"
+                        >
+                            <div class="text-lg leading-tight">{{ mode.name }}</div>
+                            <div class="text-xs text-gray-800 mt-1">{{ mode.description }}</div>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -129,6 +137,16 @@
                     </button>
                 </div>
                 <div class="p-3 space-y-2 overflow-y-auto h-[calc(100%-57px)]">
+                    <div class="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-left">
+                        <div class="text-[11px] font-bold uppercase tracking-wide text-amber-200">Цель режима</div>
+                        <div class="mt-1 text-sm font-bold text-slate-100">{{ activeGameMode.name }}</div>
+                        <div class="text-xs leading-snug text-slate-300">{{ activeGameMode.description }}</div>
+                        <div class="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-300">
+                            <div v-for="item in visibleVictoryProgress" :key="item.key">
+                                {{ item.label }}: {{ item.current }} / {{ item.required }}
+                            </div>
+                        </div>
+                    </div>
                     <div
                         v-for="item in terrainEntries"
                         :key="item.key"
@@ -171,7 +189,8 @@
 
     <script>
         const MAP_RADIUS = 2;
-        const TARGET_GOLD = 250;
+        const INITIAL_HEALTH = 50;
+        const INITIAL_GOLD = 50;
         const HEX_SIZE = 55;
 
         const ICONS = {
@@ -198,8 +217,8 @@
             state: () => ({
                 playerPosition: { q: 0, r: 0 },
                 diceRolls: [],
-                health: 50,
-                gold: 25,
+                health: INITIAL_HEALTH,
+                gold: INITIAL_GOLD,
                 map: {},
                 tiles: STATIC_TILE_TYPES.slice(),
                 tileTypes: {
@@ -211,6 +230,13 @@
                     VILLAGE: { color: 0xFCE7A1, name: 'Деревня', tooltipEffect: 'здоровье +15, золото +15', upgradeTo: 'CITY', effect: { health: 10, gold: 15, description: '+10/+15', isPositive: true } },
                     CITY: { color: 0xF2B755, name: 'Замок', tooltipEffect: 'золото +30', upgradeTo: null, effect: { health: 0, gold: 30, description: '+30 золота', isPositive: true } }
                 },
+                gameModes: {
+                    STANDARD: { name: "Новичок (рекомендуется)", description: "Выжить и заработать 100 монет", FOOD: 0, MONEY: 100, VILLAGE: 0, CITY: 0 },
+                    URBANISM: { name: "Урбанист", description: "Построить 10 деревень", FOOD: 0, MONEY: 0, VILLAGE: 10, CITY: 0 },
+                    FEUDALISM: { name: "Феодал", description: "Постромит 5 замков", FOOD: 0, MONEY: 0, VILLAGE: 0, CITY: 5 },
+                    ANKAP: { name: "Анархо-капиталист", description: "Заработать 250 любым способом", FOOD: 0, MONEY: 250, VILLAGE: 0, CITY: 0 }
+                },
+                selectedGameMode: "STANDARD",
                 turns: 0,
                 hoveredTerrainKey: null,
                 lowFoodWarningShown: false,
@@ -262,6 +288,11 @@
                 setHoveredTerrainKey(typeKey) {
                     this.hoveredTerrainKey = typeKey;
                 },
+                setGameMode(modeKey) {
+                    if (this.gameModes[modeKey]) {
+                        this.selectedGameMode = modeKey;
+                    }
+                },
                 applyEffect(typeKey) {
                     const tileType = this.tileTypes[typeKey];
                     if (!tileType) {
@@ -312,6 +343,23 @@
             if (!store.gameStarted || store.health <= 0 || store.health >= 20 || store.lowFoodWarningShown) return;
             store.lowFoodWarningShown = true;
             showNotification("Еда заканчивается! Ищите ее в поле и лесу!", "#ef4444", 4000);
+        }
+
+        function getPlayerGoalStats(gameState) {
+            const tiles = Object.values(gameState.map || {});
+            return {
+                FOOD: gameState.health,
+                MONEY: gameState.gold,
+                VILLAGE: tiles.filter((tile) => tile.typeKey === 'VILLAGE').length,
+                CITY: tiles.filter((tile) => tile.typeKey === 'CITY').length
+            };
+        }
+
+        function hasWonSelectedMode(gameState) {
+            const mode = gameState.gameModes[gameState.selectedGameMode];
+            if (!mode) return false;
+            const stats = getPlayerGoalStats(gameState);
+            return ['FOOD', 'MONEY', 'VILLAGE', 'CITY'].every((key) => stats[key] >= mode[key]);
         }
 
         function create() {
@@ -409,7 +457,7 @@
             });
 
             graphics.on('pointerdown', () => {
-                if (!store.gameStarted || playerIsMoving || store.health <= 0 || store.gold >= TARGET_GOLD) return;
+                if (!store.gameStarted || playerIsMoving || store.health <= 0 || hasWonSelectedMode(store)) return;
                 if (isNeighbor(store.playerPosition.q, store.playerPosition.r, q, r)) {
                     movePlayer(q, r);
                 }
@@ -577,8 +625,9 @@
                     if (gameStore.health <= 0) {
                         return { title: 'СМЕРТЬ', message: 'Здоровье закончилось.', colorClass: 'text-red-500' };
                     }
-                    if (gameStore.gold >= TARGET_GOLD) {
-                        return { title: 'ПОБЕДА', message: `Вы накопили ${TARGET_GOLD} золота!`, colorClass: 'text-yellow-500' };
+                    if (hasWonSelectedMode(gameStore)) {
+                        const mode = gameStore.gameModes[gameStore.selectedGameMode];
+                        return { title: 'ПОБЕДА', message: mode.description, colorClass: 'text-yellow-500' };
                     }
                     return null;
                 });
@@ -603,6 +652,23 @@
                         upgradeName: value.upgradeTo ? gameStore.tileTypes[value.upgradeTo]?.name || null : null
                     }))
                 );
+                const gameModesList = computed(() =>
+                    Object.entries(gameStore.gameModes).map(([key, value]) => ({
+                        key,
+                        ...value
+                    }))
+                );
+                const activeGameMode = computed(() => gameStore.gameModes[gameStore.selectedGameMode] || gameStore.gameModes.STANDARD);
+                const victoryProgress = computed(() => {
+                    const stats = getPlayerGoalStats(gameStore);
+                    return [
+                        { key: 'FOOD', label: 'Еда', current: stats.FOOD, required: activeGameMode.value.FOOD },
+                        { key: 'MONEY', label: 'Монеты', current: stats.MONEY, required: activeGameMode.value.MONEY },
+                        { key: 'VILLAGE', label: 'Деревни', current: stats.VILLAGE, required: activeGameMode.value.VILLAGE },
+                        { key: 'CITY', label: 'Замки', current: stats.CITY, required: activeGameMode.value.CITY }
+                    ];
+                });
+                const visibleVictoryProgress = computed(() => victoryProgress.value.filter((item) => item.required > 0));
 
                 function terrainIconSvg(typeKey) {
                     return ICONS[typeKey] || '';
@@ -613,8 +679,9 @@
                     };
                 }
 
-                function startGame() {
+                function startGame(modeKey) {
                     if (gameStore.gameStarted) return;
+                    gameStore.setGameMode(modeKey);
                     gameStore.gameStarted = true;
                     showNotification(`Приключение начинается!
 Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`, "#3b82f6", 5000);
@@ -632,8 +699,11 @@
                     canUpgrade,
                     upgradeLabel,
                     menuOpen,
+                    gameModesList,
+                    activeGameMode,
+                    victoryProgress,
+                    visibleVictoryProgress,
                     terrainEntries,
-                    TARGET_GOLD,
                     terrainIconSvg,
                     terrainIconStyle,
                     startGame,
