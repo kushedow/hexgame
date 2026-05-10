@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>КОТАН СТРОИТЕЛЬ</title>
+    <title>КОТАНДЕР - Кот-колонизатор</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/pinia@3/dist/pinia.iife.prod.js"></script>
@@ -343,10 +343,12 @@
 
             const startPos = axialToPixel(0, 0);
             playerSprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
-            playerSprite.add([
-
-                scene.add.text(0, 0, '🦊', { fontSize: '36px' }).setOrigin(0.5)
-            ]);
+            const playerBounds = scene.add.circle(0, 0, 30, 0xffffff, 0);
+            const playerIcon = scene.add.text(0, 2, '😼', {
+                fontSize: '36px',
+                padding: { left: 6, right: 6, top: 8, bottom: 8 }
+            }).setOrigin(0.5);
+            playerSprite.add([playerBounds, playerIcon]);
             playerSprite.setDepth(100);
 
             updateCurrentRollTileVisuals();
