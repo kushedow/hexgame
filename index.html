@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hex Strategy Pro</title>
+    <title>КОТАН СТРОИТЕЛЬ</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/pinia@3/dist/pinia.iife.prod.js"></script>
@@ -35,12 +35,12 @@
             <div id="notification-stack" class="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-2 z-50 pointer-events-none w-full max-w-[400px]"></div>
 
             <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="!store.gameStarted">
-                <div class="max-w-md">
-                    <h1 class="text-4xl font-black text-white mb-6 tracking-tight italic uppercase">Hex Strategy</h1>
-                    <div class="text-slate-300 space-y-4 mb-8 text-sm leading-relaxed">
-                        <p>Перемещайтесь по игровому полю и собирайте ресурсы с активных клеток. Берегитесь <span class="text-red-500 font-bold">Вулкана</span> — он отнимает 50 здоровья!</p>
-                        <p>Справа наверху предсказаны броски кубиков. Если на нем выпало <span class="text-purple-400 font-bold">6</span> — шагните на клетку с цифрой <span class="text-purple-400 font-bold">6</span> для активации.</p>
-                        <p>Цель: заработать <span class="text-yellow-500 font-bold">{{ TARGET_GOLD }} золота</span>. Используйте кнопку <span class="text-amber-400 font-bold">«Улучшить»</span> для трансформации клеток.</p>
+                <div class="max-w-md max-w-200 bg-white p-6 py-10 rounded-lg">
+                    <h1 class="text-4xl font-black  mb-6 tracking-tight uppercase">К⬢ТАНДЕР</h1>
+                    <div class="text-slate-800 space-y-4 mb-8 text-lg leading-relaxed">
+                        <p>Маленький остров ждет, пока вы наведете на него шороху своими лапками!</p>
+                        <p>Добывайте еду в лесу и в поле, золото в горах. Когда ваши аппетиты вырастут превратите поле в деревню, а деревню в город. Даже опасный вулкан можно превратить в уютные горы. Все ради золота, разумеется!</p>
+
                     </div>
                     <button @click="startGame" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg shadow-blue-900/20 transition-all">
                         Начать игру
@@ -164,7 +164,7 @@
         const MAP_RADIUS = 2;
         const TARGET_GOLD = 250;
         const HEX_SIZE = 55;
-        
+
         const ICONS = {
             LAVA: `<svg width="34" height="33" viewBox="0 0 34 33" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.2"><path d="M2.96969 32.5H30.7541C32.5497 32.5 34 31.0016 34 29.1586C34 28.5461 33.8353 27.9445 33.5272 27.4195L26.5147 15.5906C26.2969 15.2242 25.9144 15 25.5 15C25.0856 15 24.7031 15.2242 24.4853 15.5852L21.9247 19.9055L17.8326 13.7545C17.2843 12.9304 16 13.3185 16 14.3084V15.9999C16 16.5522 15.5523 16.9999 15 16.9999H12.5C11.9477 16.9999 11.5 16.5522 11.5 15.9999V14.3449C11.5 13.3519 10.2091 12.966 9.66408 13.7961L0.456875 27.8188C0.159375 28.3055 0 28.8688 0 29.443C0 31.1328 1.32813 32.5 2.96969 32.5Z" fill="black"/><rect x="2" y="3.58063" width="3" height="10" rx="1.5" transform="rotate(-31.7948 2 3.58063)" fill="black"/><rect x="12" width="3" height="10" rx="1.5" fill="black"/><rect x="22" y="2" width="3" height="10" rx="1.5" transform="rotate(30 22 2)" fill="black"/></g></svg>`,
             WASTELAND: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M21.125 21.7039C24.0957 19.4695 26 16.0367 26 12.1875C26 5.45898 20.1805 0 13 0C5.81953 0 0 5.45898 0 12.1875C0 16.0367 1.9043 19.4695 4.875 21.7039V23.5625C4.875 24.9082 5.9668 26 7.3125 26H8.9375V23.9688C8.9375 23.2934 9.48086 22.75 10.1562 22.75C10.8316 22.75 11.375 23.2934 11.375 23.9688V26H14.625V23.9688C14.625 23.2934 15.1684 22.75 15.8438 22.75C16.5191 22.75 17.0625 23.2934 17.0625 23.9688V26H18.6875C20.0332 26 21.125 24.9082 21.125 23.5625V21.7039ZM4.875 13C4.875 12.138 5.21741 11.3114 5.8269 10.7019C6.4364 10.0924 7.26305 9.75 8.125 9.75C8.98695 9.75 9.8136 10.0924 10.4231 10.7019C11.0326 11.3114 11.375 12.138 11.375 13C11.375 13.862 11.0326 14.6886 10.4231 15.2981C9.8136 15.9076 8.98695 16.25 8.125 16.25C7.26305 16.25 6.4364 15.9076 5.8269 15.2981C5.21741 14.6886 4.875 13.862 4.875 13ZM17.875 9.75C18.737 9.75 19.5636 10.0924 20.1731 10.7019C20.7826 11.3114 21.125 12.138 21.125 13C21.125 13.862 20.7826 14.6886 20.1731 15.2981C19.5636 15.9076 18.737 16.25 17.875 16.25C17.013 16.25 16.1864 15.9076 15.5769 15.2981C14.9674 14.6886 14.625 13.862 14.625 13C14.625 12.138 14.9674 11.3114 15.5769 10.7019C16.1864 10.0924 17.013 9.75 17.875 9.75Z" fill="black"/></svg>`,
@@ -573,7 +573,7 @@
                 function startGame() {
                     if (gameStore.gameStarted) return;
                     gameStore.gameStarted = true;
-                    showNotification("Выберите поле, чтобы переместиться.\nДля начала разыщите золото в горах!", "#3b82f6", 5000);
+                    showNotification("Приключение начинатся.\nДля начала разыщите еду в поле или лесу, затем добывайте золото в горах и улучшайте клетки!", "#3b82f6", 5000);
                 }
 
                 function buildUpgrade() {
