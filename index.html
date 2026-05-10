@@ -51,12 +51,15 @@
                         <p>Добывайте еду в лесу и в поле, золото в горах. Когда ваши аппетиты вырастут превратите поле в деревню, а деревню в город. Даже опасный вулкан можно превратить в уютные горы. Все ради золота, разумеется!</p>
 
                     </div>
-                    <div class="grid grid-cols-1 gap-2">
+                    <div id = "game-modes" class="grid grid-cols-1 gap-2">
                         <button
-                            v-for="mode in gameModesList"
+                            v-for="(mode, index) in gameModesList"
                             :key="mode.key"
                             @click="startGame(mode.key)"
-                            class="bg-amber-400 hover:bg-amber-500  px-5 py-3 rounded-xl   shadow-lg shadow-blue-900/20 transition-all"
+                            class="px-5 py-3 rounded-xl shadow-lg transition-all"
+                            :class="index === 0
+                                ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-900/20'
+                                : 'bg-slate-500 hover:bg-slate-400 shadow-slate-900/20'"
                         >
                             <div class="text-lg leading-tight">{{ mode.name }}</div>
                             <div class="text-xs text-gray-800 mt-1">{{ mode.description }}</div>
@@ -325,18 +328,35 @@
             });
         }
 
-        function showNotification(text, color = "#ffffff", duration = 3000) {
+        function showNotification(text, color = "#ffffff", duration = 3000, isCritical = false) {
             const stack = document.getElementById('notification-stack');
             const item = document.createElement('div');
-            item.className = 'notification-item bg-slate-900/95 backdrop-blur border border-white/10 text-white py-2.5 px-5 rounded-xl font-bold text-sm shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] text-center w-fit border-l-4';
-            item.innerText = text;
+            item.className = `notification-item bg-slate-900/95 backdrop-blur border border-white/10 text-white py-2.5 px-5 rounded-xl font-bold text-sm shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] text-center w-fit border-l-4 ${isCritical ? 'pointer-events-auto' : 'pointer-events-none'}`;
             item.style.borderColor = color;
-            stack.appendChild(item);
 
-            setTimeout(() => {
+            const textNode = document.createElement('div');
+            textNode.className = 'whitespace-pre-line';
+            textNode.innerText = text;
+            item.appendChild(textNode);
+
+            const dismiss = () => {
                 item.classList.add('notification-fade-out');
                 setTimeout(() => item.remove(), 500);
-            }, duration);
+            };
+
+            if (isCritical) {
+                const button = document.createElement('button');
+                button.className = 'mt-2 px-3 py-1 rounded-md border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-xs';
+                button.innerText = 'Понятно';
+                button.addEventListener('click', dismiss);
+                item.appendChild(button);
+            }
+
+            stack.appendChild(item);
+
+            if (!isCritical) {
+                setTimeout(dismiss, duration);
+            }
         }
 
         function checkLowFoodWarning() {
@@ -684,7 +704,7 @@
                     gameStore.setGameMode(modeKey);
                     gameStore.gameStarted = true;
                     showNotification(`Приключение начинается!
-Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`, "#3b82f6", 5000);
+Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`, "#3b82f6", 5000, true);
                 }
 
                 function buildUpgrade() {
