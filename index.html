@@ -9,30 +9,6 @@
     <script src="https://unpkg.com/pinia@3/dist/pinia.iife.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .notification-item {
-            animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .notification-fade-out {
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.5s ease;
-        }
-
-        .food-low-warning {
-            animation: foodLowBlink 0.75s ease-in-out infinite;
-        }
-
-        @keyframes foodLowBlink {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.35; transform: scale(1.08); }
-        }
-
     </style>
 </head>
 <body class="m-0 bg-slate-900 h-screen overflow-hidden touch-none flex justify-center items-center font-['Segoe_UI',sans-serif]">
@@ -41,7 +17,10 @@
     <div id="game-wrapper" class="relative w-screen h-screen flex justify-center items-center">
         <div id="game-container" class="w-full h-full relative overflow-hidden">
             <!-- Стек для всплывающих уведомлений -->
-            <div id="notification-stack" class="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-2 z-50 pointer-events-none w-full max-w-[400px]"></div>
+            <notification-stack
+                :notifications="store.notifications"
+                @dismiss="store.dismissNotification"
+            ></notification-stack>
 
             <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="!store.gameStarted">
                 <div class="max-w-md max-w-200 bg-white p-6 py-10 rounded-lg">
@@ -103,7 +82,7 @@
                         <!-- Еда -->
                         <div class=" items-center">
 
-                            <div id="food-val" class="text-4xl font-black text-red-500 leading-none mt-1" :class="{ 'food-low-warning': store.health < 20 && store.health > 0 }"> {{ store.health }}<sup class="text-md">💛</sup></div>
+                            <div id="food-val" class="text-4xl font-black text-red-500 leading-none mt-1" :class="{ 'animate-pulse': store.health < 20 && store.health > 0 }"> {{ store.health }}<sup class="text-md">💛</sup></div>
                         </div>
                         <!-- Золото -->
                         <div class="flex flex-col items-center">
@@ -213,6 +192,18 @@
             'WASTELAND', 'LAVA', 'WASTELAND', 'FOREST'
         ];
 
+        /**
+         * @typedef {Object} NotificationPayload
+         * @property {string} text
+         * @property {string} color
+         * @property {number} duration
+         * @property {boolean} isCritical
+         */
+
+        /**
+         * @typedef {NotificationPayload & { id: number }} Notification
+         */
+
         const { createApp, computed } = Vue;
         const { createPinia, defineStore } = Pinia;
 
@@ -243,7 +234,9 @@
                 turns: 0,
                 hoveredTerrainKey: null,
                 lowFoodWarningShown: false,
-                gameStarted: false
+                gameStarted: false,
+                notifications: [],
+                notificationIdCounter: 0
             }),
             getters: {
                 currentTile(state) {
@@ -309,9 +302,104 @@
                         desc: effect.description || '',
                         isPositive: effect.isPositive !== false
                     };
+                },
+                /**
+                 * @param {NotificationPayload} payload
+                 * @returns {number}
+                 */
+                addNotification(payload) {
+                    const notification = {
+                        id: this.notificationIdCounter++,
+                        text: payload?.text || '',
+                        color: payload?.color || '#ffffff',
+                        duration: Number.isFinite(payload?.duration) ? payload.duration : 3000,
+                        isCritical: Boolean(payload?.isCritical)
+                    };
+                    this.notifications.push(notification);
+                    if (this.notifications.length > 3) {
+                        this.notifications.splice(0, this.notifications.length - 3);
+                    }
+                    return notification.id;
+                },
+                dismissNotification(id) {
+                    this.notifications = this.notifications.filter((notification) => notification.id !== id);
                 }
             }
         });
+
+        const NotificationStack = {
+            props: {
+                notifications: {
+                    type: Array,
+                    default: () => []
+                }
+            },
+            emits: ['dismiss'],
+            data() {
+                return {
+                    timeoutMap: {}
+                };
+            },
+            watch: {
+                notifications: {
+                    immediate: true,
+                    deep: true,
+                    handler(nextNotifications) {
+                        const activeIds = new Set(nextNotifications.map((notification) => notification.id));
+                        Object.keys(this.timeoutMap).forEach((id) => {
+                            const numericId = Number(id);
+                            if (!activeIds.has(numericId)) {
+                                clearTimeout(this.timeoutMap[numericId]);
+                                delete this.timeoutMap[numericId];
+                            }
+                        });
+
+                        nextNotifications.forEach((notification) => {
+                            if (notification.isCritical || this.timeoutMap[notification.id]) return;
+                            this.timeoutMap[notification.id] = setTimeout(() => {
+                                this.$emit('dismiss', notification.id);
+                                delete this.timeoutMap[notification.id];
+                            }, notification.duration);
+                        });
+                    }
+                }
+            },
+            beforeUnmount() {
+                Object.values(this.timeoutMap).forEach((timerId) => clearTimeout(timerId));
+            },
+            template: `
+                <div class="absolute top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-[400px] px-2 pointer-events-none">
+                    <transition-group
+                        tag="div"
+                        class="flex flex-col-reverse items-center gap-2"
+                        enter-active-class="transition-all duration-300 ease-out"
+                        enter-from-class="opacity-0 translate-y-4 scale-95"
+                        enter-to-class="opacity-100 translate-y-0 scale-100"
+                        leave-active-class="transition-all duration-300 ease-in"
+                        leave-from-class="opacity-100 translate-y-0 scale-100"
+                        leave-to-class="opacity-0 -translate-y-4 scale-95"
+                        move-class="transition-transform duration-300 ease-out"
+                    >
+                        <div
+                            v-for="notification in notifications"
+                            :key="notification.id"
+                            class="bg-slate-900/95 backdrop-blur border border-white/10 text-white py-2.5 px-5 rounded-xl font-bold text-sm shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] text-center w-fit border-l-4"
+                            :class="notification.isCritical ? 'pointer-events-auto' : 'pointer-events-none'"
+                            :style="{ borderColor: notification.color }"
+                        >
+                            <div class="whitespace-pre-line">{{ notification.text }}</div>
+                            <button
+                                v-if="notification.isCritical"
+                                class="mt-2 px-3 py-1 rounded-md border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-xs"
+                                @click="$emit('dismiss', notification.id)"
+                            >
+                                Понятно
+                            </button>
+                        </div>
+                    </transition-group>
+                </div>
+            `
+        };
 
         let store;
         let scene;
@@ -328,41 +416,10 @@
             });
         }
 
-        function showNotification(text, color = "#ffffff", duration = 3000, isCritical = false) {
-            const stack = document.getElementById('notification-stack');
-            const item = document.createElement('div');
-            item.className = `notification-item bg-slate-900/95 backdrop-blur border border-white/10 text-white py-2.5 px-5 rounded-xl font-bold text-sm shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] text-center w-fit border-l-4 ${isCritical ? 'pointer-events-auto' : 'pointer-events-none'}`;
-            item.style.borderColor = color;
-
-            const textNode = document.createElement('div');
-            textNode.className = 'whitespace-pre-line';
-            textNode.innerText = text;
-            item.appendChild(textNode);
-
-            const dismiss = () => {
-                item.classList.add('notification-fade-out');
-                setTimeout(() => item.remove(), 500);
-            };
-
-            if (isCritical) {
-                const button = document.createElement('button');
-                button.className = 'mt-2 px-3 py-1 rounded-md border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-xs';
-                button.innerText = 'Понятно';
-                button.addEventListener('click', dismiss);
-                item.appendChild(button);
-            }
-
-            stack.appendChild(item);
-
-            if (!isCritical) {
-                setTimeout(dismiss, duration);
-            }
-        }
-
         function checkLowFoodWarning() {
             if (!store.gameStarted || store.health <= 0 || store.health >= 20 || store.lowFoodWarningShown) return;
             store.lowFoodWarningShown = true;
-            showNotification("Еда заканчивается! Ищите ее в поле и лесу!", "#ef4444", 4000);
+            store.addNotification({ text: "Еда заканчивается! Ищите ее в поле и лесу!", color: "#ef4444", duration: 4000, isCritical: false });
         }
 
         function getPlayerGoalStats(gameState) {
@@ -604,7 +661,7 @@
                     const eff = store.applyEffect(tile.typeKey);
                     resultMessage = `${eff.name}: ${eff.desc}`;
                     resultColor = eff.isPositive ? "#22c55e" : "#ef4444";
-                    showNotification(resultMessage, resultColor, 4000);
+                    store.addNotification({ text: resultMessage, color: resultColor, duration: 4000, isCritical: false });
                 }
             }
 
@@ -612,7 +669,12 @@
 
             const nextType = tile ? (store.tileTypes[tile.typeKey]?.upgradeTo || null) : null;
             if (nextType && store.gold >= 50) {
-                showNotification(`Можно улучшить до ${store.tileTypes[nextType].name.toLowerCase()} (50 золота)`, "#f59e0b", 4000);
+                store.addNotification({
+                    text: `Можно улучшить до ${store.tileTypes[nextType].name.toLowerCase()} (50 золота)`,
+                    color: "#f59e0b",
+                    duration: 4000,
+                    isCritical: false
+                });
             }
 
             playerIsMoving = false;
@@ -631,12 +693,20 @@
                 visual.typeKey = nextType;
                 visual.draw();
             }
-            showNotification(`🔨 Улучшено до ${store.tileTypes[nextType].name}!`, "#f59e0b", 3000);
+            store.addNotification({
+                text: `🔨 Улучшено до ${store.tileTypes[nextType].name}!`,
+                color: "#f59e0b",
+                duration: 3000,
+                isCritical: false
+            });
         }
 
         function update() {}
 
         const app = createApp({
+            components: {
+                NotificationStack
+            },
             setup() {
                 const gameStore = useGameStore();
                 const menuOpen = Vue.ref(false);
@@ -703,8 +773,13 @@
                     if (gameStore.gameStarted) return;
                     gameStore.setGameMode(modeKey);
                     gameStore.gameStarted = true;
-                    showNotification(`Приключение начинается!
-Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`, "#3b82f6", 5000, true);
+                    gameStore.addNotification({
+                        text: `Приключение начинается!
+Для начала разыщите еду в поле или лесу. В этом ходу можно собрать ресурсы с полей с номером ${gameStore.diceRolls[0]}. В следующем - с номером ${gameStore.diceRolls[1]}. Следите за кубиком наверху и планируйте перемещение!`,
+                        color: "#3b82f6",
+                        duration: 5000,
+                        isCritical: true
+                    });
                 }
 
                 function buildUpgrade() {
