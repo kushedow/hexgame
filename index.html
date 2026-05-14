@@ -184,7 +184,7 @@
             VILLAGE: `<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M34.3335 19.0061C33.8892 19.4509 33.3537 19.6732 32.7271 19.6732C32.1004 19.6732 31.5706 19.4452 31.1377 18.989L30.625 18.5101L33 33L33.9062 32.8105C34.2025 32.8105 34.4588 32.9188 34.6753 33.1355C34.8918 33.3521 35 33.6087 35 33.9052C35 34.2017 34.8918 34.4583 34.6753 34.675C34.4588 34.8917 34.2025 35 33.9062 35H17.5171H1.12793C0.831706 35 0.575358 34.8917 0.358887 34.675C0.142415 34.4583 0.0341797 34.2017 0.0341797 33.9052C0.0341797 33.6087 0.142415 33.3521 0.358887 33.1355C0.575358 32.9188 0.831706 32.8105 1.12793 32.8105H1.63205L4.375 18.5101L3.8623 18.989C3.42936 19.4452 2.89958 19.6732 2.27295 19.6732C1.64632 19.6732 1.11084 19.4509 0.666504 19.0061C0.222168 18.5614 0 18.0254 0 17.3982C0 16.771 0.216471 16.2407 0.649414 15.8073L15.8252 0.651648C16.2809 0.195494 16.8392 -0.0211786 17.5 0.00162912C18.1608 -0.0211786 18.7191 0.195494 19.1748 0.651648L34.3164 15.8073C34.7721 16.2407 35 16.771 35 17.3982C35 18.0254 34.7778 18.5614 34.3335 19.0061ZM26.25 22.9575C26.25 22.661 26.1418 22.4045 25.9253 22.1878C25.7088 21.9711 25.4525 21.8628 25.1562 21.8628H20.7812C20.485 21.8628 20.2287 21.9711 20.0122 22.1878C19.7957 22.4045 19.6875 22.661 19.6875 22.9575V27.3366C19.6875 27.6331 19.7957 27.8897 20.0122 28.1064C20.2287 28.3231 20.485 28.4314 20.7812 28.4314H25.1562C25.4525 28.4314 25.7088 28.3231 25.9253 28.1064C26.1418 27.8897 26.25 27.6331 26.25 27.3366V22.9575Z" fill="black"/></svg>`,
             CITY: `<svg width="36" height="34" viewBox="0 0 36 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M32.4 14.3158V34H0V19.6842C0 19.2096 0.189642 18.7545 0.527208 18.4189C0.864773 18.0833 1.32261 17.8947 1.8 17.8947H9C9.47739 17.8947 9.93523 18.0833 10.2728 18.4189C10.6104 18.7545 10.8 19.2096 10.8 19.6842V21.4737H14.4V14.3158C13.4452 14.3158 12.5295 13.9387 11.8544 13.2675C11.1793 12.5964 10.8 11.686 10.8 10.7368V1.78947C10.8 1.31488 10.9896 0.859716 11.3272 0.524125C11.6648 0.188533 12.1226 0 12.6 0L19.8 0C20.2774 0 20.7352 0.188533 21.0728 0.524125C21.4104 0.859716 21.6 1.31488 21.6 1.78947V3.57895H25.2V1.78947C25.2 1.31488 25.3896 0.859716 25.7272 0.524125C26.0648 0.188533 26.5226 0 27 0L34.2 0C34.6774 0 35.1352 0.188533 35.4728 0.524125C35.8104 0.859716 36 1.31488 36 1.78947V10.7368C36 11.686 35.6207 12.5964 34.9456 13.2675C34.2705 13.9387 33.3548 14.3158 32.4 14.3158Z" fill="black"/></svg>`
         };
-        const TILE_NUMBER_SEQUENCE = [2, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12];
+        const TILE_NUMBER_SEQUENCE = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11, 7];
         const STATIC_TILE_TYPES = [
             'FIELD', 'FOREST', 'MOUNTAIN', 'WASTELAND', 'FIELD',
             'FOREST', 'MOUNTAIN', 'WASTELAND', 'FIELD', 'FOREST',
@@ -443,20 +443,13 @@
             scene = this;
             gridContainer = this.add.container(scene.scale.width / 2, scene.scale.height / 2);
 
-            const coords = [];
-
-            for (let q = -MAP_RADIUS; q <= MAP_RADIUS; q++) {
-                const r1 = Math.max(-MAP_RADIUS, -q - MAP_RADIUS);
-                const r2 = Math.min(MAP_RADIUS, -q + MAP_RADIUS);
-                for (let r = r1; r <= r2; r++) {
-                    coords.push({ q, r });
-                }
-            }
+            const coords = getCoordsFromOuterToCenter(MAP_RADIUS);
+            const tileNumbers = getTileNumberSequenceForCount(coords.length);
 
             const shuffledTypes = shuffleInPlace(store.tiles.slice());
             coords.forEach((coord, index) => {
                 const typeKey = shuffledTypes[index];
-                const number = TILE_NUMBER_SEQUENCE[index];
+                const number = tileNumbers[index];
                 const pos = axialToPixel(coord.q, coord.r);
                 store.setMapTile({ q: coord.q, r: coord.r, typeKey, number });
                 const hex = createHex(pos.x, pos.y, coord.q, coord.r, typeKey, number);
@@ -574,6 +567,43 @@
 
         function axialDistance(q1, r1, q2, r2) {
             return (Math.abs(q1 - q2) + Math.abs(q1 + r1 - q2 - r2) + Math.abs(r1 - r2)) / 2;
+        }
+
+        function getRingCoords(radius) {
+            if (radius === 0) return [{ q: 0, r: 0 }];
+            const directions = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+            const ring = [];
+            let q = -radius;
+            let r = radius;
+
+            for (let side = 0; side < 6; side++) {
+                for (let step = 0; step < radius; step++) {
+                    ring.push({ q, r });
+                    q += directions[side][0];
+                    r += directions[side][1];
+                }
+            }
+            return ring;
+        }
+
+        function getCoordsFromOuterToCenter(radius) {
+            const coords = [];
+            for (let ringRadius = radius; ringRadius >= 1; ringRadius--) {
+                coords.push(...getRingCoords(ringRadius));
+            }
+            coords.push({ q: 0, r: 0 });
+            return coords;
+        }
+
+        function getTileNumberSequenceForCount(count) {
+            if (count <= TILE_NUMBER_SEQUENCE.length) {
+                return TILE_NUMBER_SEQUENCE.slice(0, count);
+            }
+            const sequence = [];
+            for (let i = 0; i < count; i++) {
+                sequence.push(TILE_NUMBER_SEQUENCE[i % TILE_NUMBER_SEQUENCE.length]);
+            }
+            return sequence;
         }
 
         function findNearestFoodTileNumber() {
