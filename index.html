@@ -174,6 +174,8 @@
         const INITIAL_HEALTH = 50;
         const INITIAL_GOLD = 50;
         const HEX_SIZE = 55;
+        const HEX_X_STEP = 94;
+        const HEX_Y_STEP = 82;
 
         const ICONS = {
             LAVA: `<svg width="34" height="33" viewBox="0 0 34 33" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.2"><path d="M2.96969 32.5H30.7541C32.5497 32.5 34 31.0016 34 29.1586C34 28.5461 33.8353 27.9445 33.5272 27.4195L26.5147 15.5906C26.2969 15.2242 25.9144 15 25.5 15C25.0856 15 24.7031 15.2242 24.4853 15.5852L21.9247 19.9055L17.8326 13.7545C17.2843 12.9304 16 13.3185 16 14.3084V15.9999C16 16.5522 15.5523 16.9999 15 16.9999H12.5C11.9477 16.9999 11.5 16.5522 11.5 15.9999V14.3449C11.5 13.3519 10.2091 12.966 9.66408 13.7961L0.456875 27.8188C0.159375 28.3055 0 28.8688 0 29.443C0 31.1328 1.32813 32.5 2.96969 32.5Z" fill="black"/><rect x="2" y="3.58063" width="3" height="10" rx="1.5" transform="rotate(-31.7948 2 3.58063)" fill="black"/><rect x="12" width="3" height="10" rx="1.5" fill="black"/><rect x="22" y="2" width="3" height="10" rx="1.5" transform="rotate(30 22 2)" fill="black"/></g></svg>`,
@@ -441,7 +443,7 @@
 
         function create() {
             scene = this;
-            gridContainer = this.add.container(scene.scale.width / 2, scene.scale.height / 2);
+            gridContainer = this.add.container(Math.round(scene.scale.width / 2), Math.round(scene.scale.height / 2));
 
             const coords = getCoordsFromOuterToCenter(MAP_RADIUS);
             const tileNumbers = getTileNumberSequenceForCount(coords.length);
@@ -460,7 +462,10 @@
             store.initializeDice(findNearestFoodTileNumber());
 
             const startPos = axialToPixel(0, 0);
-            playerSprite = scene.add.container(gridContainer.x + startPos.x, gridContainer.y + startPos.y);
+            playerSprite = scene.add.container(
+                Math.round(gridContainer.x + startPos.x),
+                Math.round(gridContainer.y + startPos.y)
+            );
             const playerBounds = scene.add.circle(0, 0, 30, 0xffffff, 0);
             const playerIcon = scene.add.text(0, 2, '😼', {
                 fontSize: '36px',
@@ -562,7 +567,10 @@
         }
 
         function axialToPixel(q, r) {
-            return { x: HEX_SIZE * Math.sqrt(3) * (q + r / 2), y: HEX_SIZE * 1.5 * r };
+            return {
+                x: q * HEX_X_STEP + r * (HEX_X_STEP / 2),
+                y: r * HEX_Y_STEP
+            };
         }
 
         function axialDistance(q1, r1, q2, r2) {
@@ -632,8 +640,8 @@
             const pos = axialToPixel(targetQ, targetR);
             scene.tweens.add({
                 targets: playerSprite,
-                x: gridContainer.x + pos.x,
-                y: gridContainer.y + pos.y,
+                x: Math.round(gridContainer.x + pos.x),
+                y: Math.round(gridContainer.y + pos.y),
                 duration: 400,
                 onComplete: () => {
                     store.setPlayerPosition(targetQ, targetR);
@@ -838,14 +846,17 @@
         });
 
         const pinia = createPinia();
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
         app.use(pinia);
         app.mount('#app');
 
         store = useGameStore(pinia);
         const config = {
-            type: Phaser.AUTO,
+            type: Phaser.WEBGL,
             width: window.innerWidth,
             height: window.innerHeight,
+            resolution: DPR,
             parent: 'game-container',
             backgroundColor: '#0f172a',
             scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
