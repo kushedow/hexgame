@@ -63,9 +63,9 @@
     },
     "map": [
       [5, "WASTELAND"],
-      [2, "MOUNTAIN"],
+      [9, "MOUNTAIN"],
       [6, "FIELD"],
-      [3, "WASTELAND"],
+      [4, "FIELD"],
       [8, "MOUNTAIN"],
       [10, "FIELD"],
       [7, "WASTELAND"]

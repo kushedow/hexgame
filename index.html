@@ -172,6 +172,12 @@
         const DEFAULT_START = { FOOD: 50, MONEY: 50 };
         const DEFAULT_LEVEL_ID = 'level_01';
         const PROGRESS_STORAGE_KEY = 'hexgame_progress_v1';
+        const DEATH_MESSAGES = [
+            "Вы умерли от голода, одиночества и бессмысленности своего путешествия.",
+            "Замученный дорогой, вы выбились из сил ... и умерли.",
+            "Здесь лежат и сохнут косточки кота-авантюриста",
+            "Ну вот и все. Этот помер, несите следующего"
+        ];
         const HEX_SIZE = 55;
         const HEX_X_STEP = 94;
         const HEX_Y_STEP = 82;
@@ -315,6 +321,7 @@
                     this.hoveredTerrainKey = null;
                     this.diceRolls = [];
                     this.map = {};
+                    currentDeathMessage = null;
                 },
                 applyEffect(typeKey) {
                     const tileType = this.tileTypes[typeKey];
@@ -433,6 +440,7 @@
         let gridContainer;
         let playerSprite;
         let playerIsMoving = false;
+        let currentDeathMessage = null;
         const hexGrid = {};
 
         function preload() {
@@ -802,7 +810,11 @@
 
                 const winState = computed(() => {
                     if (gameStore.health <= 0) {
-                        return { title: 'СМЕРТЬ', message: 'Здоровье закончилось.', colorClass: 'text-red-500' };
+                        if (!currentDeathMessage) {
+                            const idx = Math.floor(Math.random() * DEATH_MESSAGES.length);
+                            currentDeathMessage = DEATH_MESSAGES[idx];
+                        }
+                        return { title: '💀 СМЕРТЬ', message: currentDeathMessage, colorClass: 'text-red-500' };
                     }
                     if (hasWonCurrentLevel(gameStore)) {
                         return {
