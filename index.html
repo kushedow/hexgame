@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -37,7 +37,11 @@
                             :key="level.key"
                             @click="startGame(level.key)"
                             class="h-12 rounded-xl font-black text-lg shadow-lg transition-all"
-                            :class="levelButtonClass(level.key)"
+                            :class="isLevelCompleted(level.key)
+                                ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-900/20'
+                                : (!isLevelLocked(level.key)
+                                    ? 'bg-white text-slate-900 hover:bg-slate-100 shadow-slate-900/20'
+                                    : 'bg-slate-600 text-slate-300 cursor-not-allowed opacity-80 shadow-slate-900/10')"
                             :disabled="isLevelLocked(level.key)"
                         >
                             {{ level.number }}
@@ -141,18 +145,26 @@
                         ></div>
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-slate-100">{{ item.name }}</div>
-                            <div class="text-xs text-slate-400 leading-snug">{{ item.tooltipEffect }}</div>
+                            <div class="text-xs text-slate-400 leading-snug">{{ item.effectText }}</div>
                             <div class="text-[11px] text-slate-400 mt-1" v-if="item.upgradeName">
                                 Улучшить до {{ item.upgradeName }} (✦50)
                             </div>
                             <div class="text-[11px] text-slate-500 mt-1" v-else>Улучшение недоступно</div>
                         </div>
                     </div>
+                    <div class="pt-3">
+                        <button
+                            @click="copyCurrentLevelCode"
+                            class="w-full rounded-lg border border-slate-600 bg-slate-800/80 hover:bg-slate-700/80 transition-colors text-slate-100 text-sm font-semibold py-2"
+                        >
+                            Копировать
+                        </button>
+                    </div>
                 </div>
             </aside>
 
             <div id="action-panel" class="absolute left-1/2 top-[calc(50%+230px)] -translate-x-1/2 pointer-events-auto z-20">
-                <button @click="buildUpgrade" id="btn-build" :disabled="!canUpgrade" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all border border-amber-400 disabled:opacity-50 flex flex-col items-center gap-0.5 min-w-52">
+                <button @click="buildUpgradeAction" id="btn-build" :disabled="!canUpgrade" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all border border-amber-400 disabled:opacity-50 flex flex-col items-center gap-0.5 min-w-52">
                     <span id="btn-build-label" class="text-sm text-white">{{ upgradeLabel }}</span>
                     <span id="btn-build-shortage" v-if="showShortage" class="text-[10px] leading-none text-amber-100/80">Не хватает {{ missingGold }}</span>
                 </button>
@@ -161,7 +173,7 @@
             <div id="win-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="winState">
                 <h1 id="win-title" class="text-4xl font-black mb-2 italic" :class="winState.colorClass">{{ winState.title }}</h1>
                 <p id="win-msg" class="text-slate-400 mb-8">{{ winState.message }}</p>
-                <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold">Заново</button>
+                <button @click="returnToStartScreen" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold">Продолжить</button>
             </div>
 
         </div>
@@ -185,18 +197,6 @@
         const ICONS = window.ICONS || {};
         const TILES = window.TILES || {};
 
-        /**
-         * @typedef {Object} NotificationPayload
-         * @property {string} text
-         * @property {string} color
-         * @property {number} duration
-         * @property {boolean} isCritical
-         */
-
-        /**
-         * @typedef {NotificationPayload & { id: number }} Notification
-         */
-
         const { createApp, computed } = Vue;
         const { createPinia, defineStore } = Pinia;
 
@@ -212,13 +212,13 @@
                 currentLevelId: null,
                 progress: [],
                 tileTypes: {
-                    LAVA: { color: 0xEECC93, name: 'Вулкан', tooltipEffect: 'здоровье -50', upgradeTo: 'MOUNTAIN', effect: { health: -50, gold: 0, description: '-50 здоровья', isPositive: false } },
-                    WASTELAND: { color: 0x80847D, name: 'Пустошь', tooltipEffect: 'золото -15', upgradeTo: 'FIELD', effect: { health: 0, gold: -15, description: '-15 золота', isPositive: false } },
-                    FIELD: { color: 0x79A45B, name: 'Поле', tooltipEffect: 'здоровье +15', upgradeTo: 'VILLAGE', effect: { health: 15, gold: 0, description: '+15 здоровья', isPositive: true } },
-                    FOREST: { color: 0x99A68F, name: 'Лес', tooltipEffect: 'здоровье +10', upgradeTo: 'FIELD', effect: { health: 10, gold: 0, description: '+10 здоровья', isPositive: true } },
-                    MOUNTAIN: { color: 0xECE3D4, name: 'Горы', tooltipEffect: 'золото +15', upgradeTo: 'CITY', effect: { health: 0, gold: 15, description: '+15 золота', isPositive: true } },
-                    VILLAGE: { color: 0xFCE7A1, name: 'Деревня', tooltipEffect: 'здоровье +15, золото +15', upgradeTo: 'CITY', effect: { health: 10, gold: 15, description: '+10/+15', isPositive: true } },
-                    CITY: { color: 0xF2B755, name: 'Замок', tooltipEffect: 'золото +30', upgradeTo: null, effect: { health: 0, gold: 30, description: '+30 золота', isPositive: true } }
+                    LAVA: { color: 0xEECC93, name: 'Вулкан', description: '-50 здоровья', upgradeTo: 'MOUNTAIN', effect: { health: -50, gold: 0, isPositive: false } },
+                    WASTELAND: { color: 0x80847D, name: 'Пустошь', description: '-15 золота', upgradeTo: 'FIELD', effect: { health: 0, gold: -15, isPositive: false } },
+                    FIELD: { color: 0x79A45B, name: 'Поле', description: '+15 здоровья', upgradeTo: 'VILLAGE', effect: { health: 15, gold: 0, isPositive: true } },
+                    FOREST: { color: 0x99A68F, name: 'Лес', description: '+10 здоровья', upgradeTo: 'FIELD', effect: { health: 10, gold: 0, isPositive: true } },
+                    MOUNTAIN: { color: 0xECE3D4, name: 'Горы', description: '+15 золота', upgradeTo: 'CITY', effect: { health: 0, gold: 15, isPositive: true } },
+                    VILLAGE: { color: 0xFCE7A1, name: 'Деревня', description: '+10 здоровья, +15 золота', upgradeTo: 'CITY', effect: { health: 10, gold: 15, isPositive: true } },
+                    CITY: { color: 0xF2B755, name: 'Замок', description: '+30 золота', upgradeTo: null, effect: { health: 0, gold: 30, isPositive: true } }
                 },
                 turns: 0,
                 hoveredTerrainKey: null,
@@ -333,14 +333,11 @@
                     this.adjustGold(effect.gold || 0);
                     return {
                         name: tileType.name,
-                        desc: effect.description || '',
+                        desc: tileType.description || 'без эффекта',
                         isPositive: effect.isPositive !== false
                     };
                 },
-                /**
-                 * @param {NotificationPayload} payload
-                 * @returns {number}
-                 */
+
                 addNotification(payload) {
                     const notification = {
                         id: this.notificationIdCounter++,
@@ -443,17 +440,17 @@
         let currentDeathMessage = null;
         const hexGrid = {};
 
+        function preloadSvgMap(loader, map, prefix) {
+            Object.keys(map).forEach((key) => {
+                const blob = new Blob([map[key]], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                loader.image(`${prefix}_${key}`, url);
+            });
+        }
+
         function preload() {
-            Object.keys(ICONS).forEach((key) => {
-                const blob = new Blob([ICONS[key]], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                this.load.image(`icon_${key}`, url);
-            });
-            Object.keys(TILES).forEach((key) => {
-                const blob = new Blob([TILES[key]], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                this.load.image(`tile_${key}`, url);
-            });
+            preloadSvgMap(this.load, ICONS, 'icon');
+            preloadSvgMap(this.load, TILES, 'tile');
         }
 
         function checkLowFoodWarning() {
@@ -562,8 +559,8 @@
             const iconSprite = scene.add.image(0, 30, `icon_${typeKey}`).setScale(0.6).setOrigin(0.5, 0.5);
             const numBg = scene.add.circle(0, -5, 13, 0x0f172a, 0.0);
             const numText = scene.add.text(0, 0, number, { fontSize: '26px', fontStyle: 'bold', color: '#000', alpha: 1 }).setOrigin(0.5);
-            const resourceText = scene.add.text(0, -30, '', {
-                fontSize: '16px',
+            const resourceText = scene.add.text(0, -28, '', {
+                fontSize: '14px',
                 fontStyle: 'normal',
                 color: '#444'
             }).setOrigin(0.5).setVisible(false);
@@ -632,7 +629,7 @@
             if (gold) parts.push(`${gold > 0 ? '+' : ''}${gold}✦`);
             if (health) parts.push(`${health > 0 ? '+' : ''}${health}♥`);
 
-            return parts.length ? parts.join('  ') : '0';
+            return parts.length ? parts.join(' ') : '0';
         }
 
         function rollDiceValue() {
@@ -790,8 +787,6 @@
             }
         }
 
-        function update() {}
-
         async function loadLevels() {
             const response = await fetch('./levels.json');
             if (!response.ok) {
@@ -809,6 +804,7 @@
                 const menuOpen = Vue.ref(false);
 
                 const winState = computed(() => {
+                    if (!gameStore.gameStarted) return null;
                     if (gameStore.health <= 0) {
                         if (!currentDeathMessage) {
                             const idx = Math.floor(Math.random() * DEATH_MESSAGES.length);
@@ -841,7 +837,7 @@
                     Object.entries(gameStore.tileTypes).map(([key, value]) => ({
                         key,
                         name: value.name,
-                        tooltipEffect: value.tooltipEffect,
+                        effectText: value.description || 'без эффекта',
                         color: value.color,
                         upgradeName: value.upgradeTo ? gameStore.tileTypes[value.upgradeTo]?.name || null : null
                     }))
@@ -890,16 +886,6 @@
                     return levelId !== nextUnpassedLevelId.value;
                 }
 
-                function levelButtonClass(levelId) {
-                    if (isLevelCompleted(levelId)) {
-                        return 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-900/20';
-                    }
-                    if (!isLevelLocked(levelId)) {
-                        return 'bg-white text-slate-900 hover:bg-slate-100 shadow-slate-900/20';
-                    }
-                    return 'bg-slate-600 text-slate-300 cursor-not-allowed opacity-80 shadow-slate-900/10';
-                }
-
                 function startGame(levelId) {
                     if (gameStore.gameStarted) return;
                     if (isLevelLocked(levelId)) return;
@@ -922,8 +908,53 @@
                     });
                 }
 
-                function buildUpgrade() {
-                    buildUpgradeAction();
+                function returnToStartScreen() {
+                    gameStore.gameStarted = false;
+                    gameStore.setHoveredTerrainKey(null);
+                    gameStore.notifications = [];
+                    menuOpen.value = false;
+                    currentDeathMessage = null;
+                }
+
+                async function copyCurrentLevelCode() {
+                    const levelId = gameStore.currentLevelId;
+                    const levelData = levelId ? gameStore.levels[levelId] : null;
+                    if (!levelData) {
+                        gameStore.addNotification({
+                            text: "Текущий уровень не найден.",
+                            color: "#ef4444",
+                            duration: 2500,
+                            isCritical: false
+                        });
+                        return;
+                    }
+
+                    const text = JSON.stringify(levelData, null, 2);
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        gameStore.addNotification({
+                            text: `Уровень ${levelId} скопирован в буфер.`,
+                            color: "#22c55e",
+                            duration: 2500,
+                            isCritical: false
+                        });
+                    } catch (_) {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        const copied = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        gameStore.addNotification({
+                            text: copied ? `Уровень ${levelId} скопирован в буфер.` : "Не удалось скопировать код уровня.",
+                            color: copied ? "#22c55e" : "#ef4444",
+                            duration: 2500,
+                            isCritical: false
+                        });
+                    }
                 }
 
                 return {
@@ -935,15 +966,16 @@
                     upgradeLabel,
                     menuOpen,
                     levelsList,
-                    goalProgress,
                     visibleGoalProgress,
                     terrainEntries,
                     terrainIconSvg,
                     terrainIconStyle,
+                    isLevelCompleted,
                     isLevelLocked,
-                    levelButtonClass,
                     startGame,
-                    buildUpgrade
+                    returnToStartScreen,
+                    copyCurrentLevelCode,
+                    buildUpgradeAction
                 };
             }
         });
@@ -972,7 +1004,7 @@
                 parent: 'game-container',
                 backgroundColor: '#0f172a',
                 scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
-                scene: { preload, create, update }
+                scene: { preload, create }
             };
 
             new Phaser.Game(config);

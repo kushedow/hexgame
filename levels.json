@@ -72,13 +72,13 @@
     ]
   },
   "level_04": {
-    "name": "Огненный пояс",
-    "radius": 2,
+    "name": "Охота за золотом",
+    "radius": 1,
     "start": {
       "FOOD": 55,
       "MONEY": 45
     },
-    "instruction": "Новый тип тайла: Лава (LAVA) - очень опасная клетка, через нее нужно идти только при необходимости.\nЦель уровня: набрать 10 еды, 120 золота, 0 деревень и 0 замков.",
+    "instruction": "На этом уровне достаточно еды, но горы только одни. Запаситесь терпением, чтобы собрать  150 золота",
     "goals": {
       "FOOD": 10,
       "MONEY": 120,
@@ -86,24 +86,12 @@
       "CITY": 0
     },
     "map": [
-      [5, "FIELD"],
-      [2, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "FIELD"],
-      [8, "MOUNTAIN"],
-      [10, "WASTELAND"],
-      [9, "FIELD"],
-      [12, "LAVA"],
-      [11, "MOUNTAIN"],
-      [4, "WASTELAND"],
-      [8, "FIELD"],
-      [10, "MOUNTAIN"],
+      [5, "WASTELAND"],
       [9, "WASTELAND"],
+      [6, "FIELD"],
       [4, "FIELD"],
-      [5, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "LAVA"],
-      [11, "FIELD"],
+      [8, "FIELD"],
+      [10, "FIELD"],
       [7, "MOUNTAIN"]
     ]
   },
