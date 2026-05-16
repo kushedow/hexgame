@@ -110,25 +110,25 @@
       "CITY": 0
     },
     "map":  [
-      [ 5, "FIELD"  ],
-      [ 2,  "FIELD"  ],
-      [ 6,  "FIELD"  ],
+      [ 5, "FIELD" ],
+      [ 2,  "FIELD" ],
+      [ 6,  "FIELD" ],
       [ 3,  "WASTELAND" ],
-      [ 8,  "MOUNTAIN"  ],
+      [ 8,  "MOUNTAIN" ],
       [ 10, "MOUNTAIN" ],
-      [ 9,  "MOUNTAIN"   ],
-      [ 12,  "WASTELAND"  ],
+      [ 9,  "MOUNTAIN"  ],
+      [ 12,  "WASTELAND" ],
       [ 11,   "MOUNTAIN" ],
-      [ 4,  "MOUNTAIN"  ],
-      [ 8,  "MOUNTAIN"  ],
+      [ 4,  "MOUNTAIN" ],
+      [ 8,  "MOUNTAIN" ],
       [ 10,  "WASTELAND" ],
       [ 9, "FIELD" ],
-      [ 4, "FIELD"  ],
+      [ 4, "FIELD" ],
       [ 5,  "WASTELAND" ],
       [ 6,  "WASTELAND"],
-      [ 3,  "WASTELAND"  ],
-      [ 11, "WASTELAND"  ],
-      [ 7, "FIELD"   ]
+      [ 3,  "WASTELAND" ],
+      [ 11, "WASTELAND" ],
+      [ 7, "FIELD" ]
     ]
   },
   "level_06": {
