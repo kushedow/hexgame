@@ -135,8 +135,9 @@
                     <div
                         v-for="item in terrainEntries"
                         :key="item.key"
-                        class="flex items-start gap-3 rounded-lg p-2.5 "
+                        class="flex items-start gap-3 rounded-lg p-2.5 cursor-pointer"
                         :class="store.hoveredTerrainKey === item.key ? ' bg-slate-800/90' : 'border-slate-800 bg-slate-900/70'"
+                        @click="setCurrentTileTypeFromMenu(item.key)"
                     >
                         <div
                             class="w-10 h-10 rounded-md flex items-center justify-center shrink-0 [&>svg]:w-6 [&>svg]:h-6"
@@ -929,7 +930,23 @@
                         return;
                     }
 
-                    const text = JSON.stringify(levelData, null, 2);
+                    const radius = Number.isFinite(levelData.radius) ? levelData.radius : 0;
+                    const coords = getCoordsFromOuterToCenter(radius);
+                    const originalMap = Array.isArray(levelData.map) ? levelData.map : [];
+                    const currentMap = coords.map((coord, index) => {
+                        const currentTile = gameStore.map[`${coord.q},${coord.r}`];
+                        if (currentTile) {
+                            return [currentTile.number, currentTile.typeKey];
+                        }
+                        const fallbackCell = originalMap[index] || [7, 'FIELD'];
+                        return [fallbackCell[0], fallbackCell[1]];
+                    });
+
+                    const levelSnapshot = {
+                        ...levelData,
+                        map: currentMap
+                    };
+                    const text = JSON.stringify(levelSnapshot, null, 2);
                     try {
                         await navigator.clipboard.writeText(text);
                         gameStore.addNotification({
@@ -957,6 +974,21 @@
                     }
                 }
 
+                function setCurrentTileTypeFromMenu(typeKey) {
+                    if (!gameStore.gameStarted) return;
+                    if (!gameStore.tileTypes[typeKey]) return;
+                    const tile = gameStore.currentTile;
+                    if (!tile) return;
+
+                    gameStore.setTileType(tile.q, tile.r, typeKey);
+
+                    const visual = hexGrid[`${tile.q},${tile.r}`];
+                    if (visual) {
+                        visual.typeKey = typeKey;
+                        visual.draw();
+                    }
+                }
+
                 return {
                     store: gameStore,
                     winState,
@@ -975,6 +1007,7 @@
                     startGame,
                     returnToStartScreen,
                     copyCurrentLevelCode,
+                    setCurrentTileTypeFromMenu,
                     buildUpgradeAction
                 };
             }

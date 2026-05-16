@@ -96,39 +96,39 @@
     ]
   },
   "level_05": {
-    "name": "Лесные тропы",
+    "name": "Экспедиция через пустоши",
     "radius": 2,
     "start": {
       "FOOD": 50,
-      "MONEY": 40
+      "MONEY": 0
     },
-    "instruction": "Новый тип тайла: Лес (FOREST) - удобный источник еды для стабильного развития.\nЦель уровня: набрать 20 еды, 130 золота, 0 деревень и 0 замков.",
+    "instruction": "За пустошами много золота, но к путешествию нужно будет подготовиться! \nЦель уровня: набрать 150 золота",
     "goals": {
-      "FOOD": 20,
-      "MONEY": 130,
+      "FOOD": 0,
+      "MONEY": 150,
       "VILLAGE": 0,
       "CITY": 0
     },
-    "map": [
-      [5, "FOREST"],
-      [2, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "FIELD"],
-      [8, "FOREST"],
-      [10, "MOUNTAIN"],
-      [9, "WASTELAND"],
-      [12, "LAVA"],
-      [11, "FIELD"],
-      [4, "MOUNTAIN"],
-      [8, "FOREST"],
-      [10, "WASTELAND"],
-      [9, "FIELD"],
-      [4, "FOREST"],
-      [5, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "LAVA"],
-      [11, "FIELD"],
-      [7, "FOREST"]
+    "map":  [
+      [ 5, "FIELD"  ],
+      [ 2,  "FIELD"  ],
+      [ 6,  "FIELD"  ],
+      [ 3,  "WASTELAND" ],
+      [ 8,  "MOUNTAIN"  ],
+      [ 10, "MOUNTAIN" ],
+      [ 9,  "MOUNTAIN"   ],
+      [ 12,  "WASTELAND"  ],
+      [ 11,   "MOUNTAIN" ],
+      [ 4,  "MOUNTAIN"  ],
+      [ 8,  "MOUNTAIN"  ],
+      [ 10,  "WASTELAND" ],
+      [ 9, "FIELD" ],
+      [ 4, "FIELD"  ],
+      [ 5,  "WASTELAND" ],
+      [ 6,  "WASTELAND"],
+      [ 3,  "WASTELAND"  ],
+      [ 11, "WASTELAND"  ],
+      [ 7, "FIELD"   ]
     ]
   },
   "level_06": {
