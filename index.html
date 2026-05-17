@@ -15,31 +15,24 @@
     <style>
     </style>
 </head>
-<body class="m-0 bg-slate-900 h-screen overflow-hidden touch-none flex justify-center items-center font-['Rubik',sans-serif] font-normal">
+<body class="m-0 bg-[#473036] h-screen overflow-hidden touch-none flex justify-center items-center font-['Rubik',sans-serif] font-normal">
 
     <div id="app" class="w-full h-full">
     <div id="game-wrapper" class="relative w-screen h-screen flex justify-center items-center">
         <div id="game-container" class="w-full h-full relative overflow-hidden">
-            <!-- Стек для всплывающих уведомлений -->
-            <notification-stack
-                :notifications="store.notifications"
-                @dismiss="store.dismissNotification"
-            ></notification-stack>
-
-            <div id="start-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center z-[100] p-8 text-center" v-if="!store.gameStarted">
-                <div class="max-w-md max-w-200 bg-white p-6 py-10 rounded-lg">
-                    <h1 class="text-4xl font-extrabold mb-6 tracking-tight uppercase">К⬢ТАНДЕР</h1>
-                    <div class="text-slate-800 space-y-4 mb-8 text-lg leading-relaxed">
-                        <p>Маленький остров ждет, пока вы наведете на него шороху своими лапками!</p>
-                        <p>Добывайте еду в лесу и в поле, золото в горах. Когда ваши аппетиты вырастут — превратите поле в деревню, а деревню в замок. Даже опасный вулкан можно превратить в уютные горы. Все ради золота, разумеется!</p>
-
+            <div id="start-screen" class="w-full h-full bg-slate-950/95 flex flex-col justify-start sm:justify-center items-center px-4 py-5 sm:px-6 sm:py-8 text-center overflow-y-auto overscroll-y-contain touch-auto" v-if="!store.gameStarted">
+                <div class="w-full max-w-xl bg-[#473036] rounded-3xl shadow-xl">
+                    <img id="start-screen__cover" src="/assets/cover.png" alt="">
+                    <div class="space-y-3 sm:space-y-4 text-base sm:text-lg leading-relaxed p-6">
+                        <p class="font-black text-[#F7D494] text-xl">Маленький остров ждет, пока вы наведете шороху своими лапками!</p>
+                        <p class="text-sm leading-relaxed text-[#fff]">Добывайте еду в лесу и в поле, золото в горах. Когда ваши аппетиты вырастут — превратите поле в деревню, а деревню в замок. Даже опасный вулкан можно превратить в уютные горы. Все ради золота, разумеется!</p>
                     </div>
-                    <div id="game-levels" class="grid grid-cols-4 gap-2">
+                    <div id="game-levels" class="grid grid-cols-4 gap-2.5 sm:gap-3 p-6 pt-0">
                         <button
                             v-for="level in levelsList"
                             :key="level.key"
                             @click="startGame(level.key)"
-                            class="h-12 rounded-xl font-extrabold text-lg shadow-lg transition-all"
+                            class="h-11 sm:h-12 rounded-xl font-extrabold text-base sm:text-lg shadow-lg transition-all"
                             :class="isLevelCompleted(level.key)
                                 ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-900/20'
                                 : (!isLevelLocked(level.key)
@@ -52,6 +45,12 @@
                     </div>
                 </div>
             </div>
+            <template v-else>
+            <!-- Стек для всплывающих уведомлений -->
+            <notification-stack
+                :notifications="store.notifications"
+                @dismiss="store.dismissNotification"
+            ></notification-stack>
 
             <!-- UI Layer -->
             <div id="ui-layer" class="fixed top-4 left-0 w-full px-4 pointer-events-none text-white z-10">
@@ -176,6 +175,7 @@
                 <p id="win-msg" class="text-slate-400 mb-8">{{ winState.message }}</p>
                 <button @click="returnToStartScreen" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-normal">Продолжить</button>
             </div>
+            </template>
 
         </div>
     </div>
@@ -1058,7 +1058,7 @@
                 resolution: DPR,
                 render: { roundPixels: true },
                 parent: 'game-container',
-                backgroundColor: '#0f172a',
+                backgroundColor: '#473036',
                 scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
                 scene: { preload, create }
             };

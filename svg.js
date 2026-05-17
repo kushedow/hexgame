@@ -9,64 +9,13 @@ window.ICONS = {
 };
 
 window.TILES = {
-    MOUNTAIN: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#ECE3D4"/>
-<path opacity="0.1" d="M34 115.295L74.0802 91.674L110.432 117.674L146.318 91.674L185 115.295" stroke="black" stroke-width="13" stroke-linecap="round"/>
-<path opacity="0.1" d="M45.5 154L74.0802 135.674L110.432 161.674L146.318 135.674L174 152" stroke="black" stroke-width="13" stroke-linecap="round"/>
-</svg>`,
-
-    LAVA: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#C98E94"/>
-<path opacity="0.15" d="M145.5 66V106L175.5 85L150 146L184 124.5L150 195.5" stroke="black" stroke-width="12"/>
-<path opacity="0.15" d="M68.5 66V106L38.5 85L64 146L30 124.5L64 195.5" stroke="black" stroke-width="12"/>
-</svg>`,
-
-    FIELD: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#79A45B"/>
-<rect opacity="0.15" x="20.4337" y="84.9397" width="40.7563" height="15" rx="7.5" transform="rotate(-30.3095 20.4337 84.9397)" fill="black"/>
-<rect opacity="0.15" x="119.236" y="154.891" width="81.0241" height="15" rx="7.5" transform="rotate(-30.3095 119.236 154.891)" fill="black"/>
-<rect opacity="0.15" x="20" y="126.855" width="83.523" height="15" rx="7.5" transform="rotate(-30.3095 20 126.855)" fill="black"/>
-<rect opacity="0.15" x="138.339" y="187.716" width="56.9012" height="15" rx="7.5" transform="rotate(-30.3095 138.339 187.716)" fill="black"/>
-<rect opacity="0.15" x="23" y="167.85" width="193.202" height="15" rx="7.5" transform="rotate(-30.3095 23 167.85)" fill="black"/>
-</svg>`,
-
-    WASTELAND: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#80847D"/>
-<g opacity="0.15">
-<path d="M23.5505 139.929C21.37 137.581 21.5058 133.91 23.8538 131.73L44.25 112.789C46.598 110.608 50.2691 110.744 52.4495 113.092C54.63 115.44 54.4942 119.111 52.1462 121.292L31.75 140.233C29.402 142.413 25.7309 142.277 23.5505 139.929Z" fill="black"/>
-<path d="M24.5815 112.55C26.9294 110.37 30.6005 110.506 32.7809 112.854L51.7219 133.25C53.9023 135.598 53.7665 139.269 51.4185 141.45C49.0706 143.63 45.3995 143.494 43.2191 141.146L24.2781 120.75C22.0977 118.402 22.2335 114.731 24.5815 112.55Z" fill="black"/>
-</g>
-<g opacity="0.15">
-<path d="M164.55 139.929C162.37 137.581 162.506 133.91 164.854 131.73L185.25 112.789C187.598 110.608 191.269 110.744 193.45 113.092C195.63 115.44 195.494 119.111 193.146 121.292L172.75 140.233C170.402 142.413 166.731 142.277 164.55 139.929Z" fill="black"/>
-<path d="M165.581 112.55C167.929 110.37 171.6 110.506 173.781 112.854L192.722 133.25C194.902 135.598 194.767 139.269 192.419 141.45C190.071 143.63 186.4 143.494 184.219 141.146L165.278 120.75C163.098 118.402 163.233 114.731 165.581 112.55Z" fill="black"/>
-</g>
-</svg>`,
-
-    FOREST: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#87952F"/>
-<rect opacity="0.2" x="21" y="128" width="47" height="15" rx="7.5" transform="rotate(-90 21 128)" fill="black"/>
-<rect opacity="0.2" x="182" y="131" width="47" height="15" rx="7.5" transform="rotate(-90 182 131)" fill="black"/>
-<rect opacity="0.2" x="182" y="178" width="34" height="15" rx="7.5" transform="rotate(-90 182 178)" fill="black"/>
-<rect opacity="0.2" x="20" y="175" width="34" height="15" rx="7.5" transform="rotate(-90 20 175)" fill="black"/>
-<rect opacity="0.2" x="58" y="167" width="47" height="15" rx="7.5" transform="rotate(-90 58 167)" fill="black"/>
-<rect opacity="0.2" x="57" y="106" width="47" height="15" rx="7.5" transform="rotate(-90 57 106)" fill="black"/>
-<rect opacity="0.2" x="146" y="106" width="47" height="15" rx="7.5" transform="rotate(-90 146 106)" fill="black"/>
-<rect opacity="0.2" x="146" y="167" width="47" height="15" rx="7.5" transform="rotate(-90 146 167)" fill="black"/>
-</svg>`,
-
-    CITY: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#F2B755"/>
-<path opacity="0.1" d="M73.2176 190L32.3567 168.578C29.0633 166.851 27 163.44 27 159.721V95C27 89.4771 31.4772 85 37 85H52.0731C57.5959 85 62.0731 89.4772 62.0731 95V110.158C62.0731 115.681 66.5502 120.158 72.0731 120.158H92.0988H127.584H144.425C149.948 120.158 154.425 115.681 154.425 110.158V95C154.425 89.4772 158.902 85 164.425 85H179C184.523 85 189 89.4772 189 95V114.932V157.27C189 160.775 187.164 164.025 184.162 165.834L145.641 189.05" stroke="black" stroke-width="13" stroke-linecap="round"/>
-</svg>`,
-
-    VILLAGE: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#C4CF79"/>
-<path opacity="0.1" d="M164.567 65.072L186.517 77.9719L187.124 101.906" stroke="black" stroke-width="15" stroke-linecap="round"/>
-<path opacity="0.1" d="M53.0496 66.7943L31.0992 79.6942L30.4922 103.628" stroke="black" stroke-width="15" stroke-linecap="round"/>
-<path opacity="0.1" d="M190.62 148.697L188.664 173.126L166.671 182.59" stroke="black" stroke-width="15" stroke-linecap="round"/>
-<path opacity="0.1" d="M53.4248 184.214L32.1509 172.047L32.9475 148.118" stroke="black" stroke-width="15" stroke-linecap="round"/>
-</svg>
-`
-
-
+    MOUNTAIN: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#ECE3D4"/><path opacity="0.1" d="M34 115.295L74.0802 91.674L110.432 117.674L146.318 91.674L185 115.295" stroke="black" stroke-width="13" stroke-linecap="round"/><path opacity="0.1" d="M45.5 154L74.0802 135.674L110.432 161.674L146.318 135.674L174 152" stroke="black" stroke-width="13" stroke-linecap="round"/></svg>`,
+    LAVA: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#C98E94"/><path opacity="0.15" d="M145.5 66V106L175.5 85L150 146L184 124.5L150 195.5" stroke="black" stroke-width="12"/><path opacity="0.15" d="M68.5 66V106L38.5 85L64 146L30 124.5L64 195.5" stroke="black" stroke-width="12"/></svg>`,
+    FIELD: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#79A45B"/><rect opacity="0.15" x="20.4337" y="84.9397" width="40.7563" height="15" rx="7.5" transform="rotate(-30.3095 20.4337 84.9397)" fill="black"/><rect opacity="0.15" x="119.236" y="154.891" width="81.0241" height="15" rx="7.5" transform="rotate(-30.3095 119.236 154.891)" fill="black"/><rect opacity="0.15" x="20" y="126.855" width="83.523" height="15" rx="7.5" transform="rotate(-30.3095 20 126.855)" fill="black"/><rect opacity="0.15" x="138.339" y="187.716" width="56.9012" height="15" rx="7.5" transform="rotate(-30.3095 138.339 187.716)" fill="black"/><rect opacity="0.15" x="23" y="167.85" width="193.202" height="15" rx="7.5" transform="rotate(-30.3095 23 167.85)" fill="black"/></svg>`,
+    WASTELAND: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#80847D"/><g opacity="0.15"><path d="M23.5505 139.929C21.37 137.581 21.5058 133.91 23.8538 131.73L44.25 112.789C46.598 110.608 50.2691 110.744 52.4495 113.092C54.63 115.44 54.4942 119.111 52.1462 121.292L31.75 140.233C29.402 142.413 25.7309 142.277 23.5505 139.929Z" fill="black"/><path d="M24.5815 112.55C26.9294 110.37 30.6005 110.506 32.7809 112.854L51.7219 133.25C53.9023 135.598 53.7665 139.269 51.4185 141.45C49.0706 143.63 45.3995 143.494 43.2191 141.146L24.2781 120.75C22.0977 118.402 22.2335 114.731 24.5815 112.55Z" fill="black"/></g><g opacity="0.15"><path d="M164.55 139.929C162.37 137.581 162.506 133.91 164.854 131.73L185.25 112.789C187.598 110.608 191.269 110.744 193.45 113.092C195.63 115.44 195.494 119.111 193.146 121.292L172.75 140.233C170.402 142.413 166.731 142.277 164.55 139.929Z" fill="black"/><path d="M165.581 112.55C167.929 110.37 171.6 110.506 173.781 112.854L192.722 133.25C194.902 135.598 194.767 139.269 192.419 141.45C190.071 143.63 186.4 143.494 184.219 141.146L165.278 120.75C163.098 118.402 163.233 114.731 165.581 112.55Z" fill="black"/></g></svg>`,
+    FOREST: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#87952F"/><rect opacity="0.2" x="21" y="128" width="47" height="15" rx="7.5" transform="rotate(-90 21 128)" fill="black"/><rect opacity="0.2" x="182" y="131" width="47" height="15" rx="7.5" transform="rotate(-90 182 131)" fill="black"/><rect opacity="0.2" x="182" y="178" width="34" height="15" rx="7.5" transform="rotate(-90 182 178)" fill="black"/><rect opacity="0.2" x="20" y="175" width="34" height="15" rx="7.5" transform="rotate(-90 20 175)" fill="black"/><rect opacity="0.2" x="58" y="167" width="47" height="15" rx="7.5" transform="rotate(-90 58 167)" fill="black"/><rect opacity="0.2" x="57" y="106" width="47" height="15" rx="7.5" transform="rotate(-90 57 106)" fill="black"/><rect opacity="0.2" x="146" y="106" width="47" height="15" rx="7.5" transform="rotate(-90 146 106)" fill="black"/><rect opacity="0.2" x="146" y="167" width="47" height="15" rx="7.5" transform="rotate(-90 146 167)" fill="black"/></svg>`,
+    CITY: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#F2B755"/><path opacity="0.1" d="M73.2176 190L32.3567 168.578C29.0633 166.851 27 163.44 27 159.721V95C27 89.4771 31.4772 85 37 85H52.0731C57.5959 85 62.0731 89.4772 62.0731 95V110.158C62.0731 115.681 66.5502 120.158 72.0731 120.158H92.0988H127.584H144.425C149.948 120.158 154.425 115.681 154.425 110.158V95C154.425 89.4772 158.902 85 164.425 85H179C184.523 85 189 89.4772 189 95V114.932V157.27C189 160.775 187.164 164.025 184.162 165.834L145.641 189.05" stroke="black" stroke-width="13" stroke-linecap="round"/></svg>`,
+    VILLAGE: `<svg width="219" height="253" viewBox="0 0 219 253" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M109.12 0L218.239 63.028V189.084L109.12 252.112L0 189.084V63.028L109.12 0Z" fill="#C4CF79"/><path opacity="0.1" d="M164.567 65.072L186.517 77.9719L187.124 101.906" stroke="black" stroke-width="15" stroke-linecap="round"/><path opacity="0.1" d="M53.0496 66.7943L31.0992 79.6942L30.4922 103.628" stroke="black" stroke-width="15" stroke-linecap="round"/><path opacity="0.1" d="M190.62 148.697L188.664 173.126L166.671 182.59" stroke="black" stroke-width="15" stroke-linecap="round"/><path opacity="0.1" d="M53.4248 184.214L32.1509 172.047L32.9475 148.118" stroke="black" stroke-width="15" stroke-linecap="round"/></svg>`
 };
+
+
