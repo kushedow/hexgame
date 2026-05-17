@@ -111,7 +111,7 @@
                 :class="menuOpen ? 'translate-x-0' : '-translate-x-full'"
             >
                 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                    <h2 class="text-sm font-normal tracking-wide text-slate-100 uppercase">Террейны</h2>
+                    <h2 class="text-sm font-normal tracking-wide text-slate-100 uppercase">Уровень</h2>
                     <button
                         @click="menuOpen = false"
                         class="w-8 h-8 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800/80 transition-colors"
@@ -124,7 +124,7 @@
                     <div class="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-left" v-if="store.currentLevel">
                         <div class="text-[11px] font-normal uppercase tracking-wide text-amber-200">Цель уровня</div>
                         <div class="mt-1 text-sm font-normal text-slate-100">{{ store.currentLevel.name }}</div>
-                        <div class="text-xs leading-snug text-slate-300">{{ store.currentLevel.instruction }}</div>
+                        <div class="text-xs leading-snug text-slate-300">{{ currentLevelIntroInstruction }}</div>
                         <div class="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-300">
                             <div v-for="item in visibleGoalProgress" :key="item.key">
                                 {{ item.label }}: {{ item.current }} / {{ item.required }}
@@ -234,7 +234,12 @@
                 }
             },
             actions: {
-                initializeDice(firstRoll = rollDiceValue()) {
+                initializeDice(initialRolls = null) {
+                    if (Array.isArray(initialRolls) && initialRolls.length >= 3) {
+                        this.diceRolls = [initialRolls[0], initialRolls[1], initialRolls[2]];
+                        return;
+                    }
+                    const firstRoll = rollDiceValue();
                     this.diceRolls = [firstRoll, rollDiceValue(), rollDiceValue()];
                 },
                 consumeDiceRoll() {
@@ -355,6 +360,9 @@
                 },
                 dismissNotification(id) {
                     this.notifications = this.notifications.filter((notification) => notification.id !== id);
+                },
+                clearNotifications() {
+                    this.notifications = [];
                 }
             }
         });
@@ -367,11 +375,6 @@
                 }
             },
             emits: ['dismiss'],
-            data() {
-                return {
-                    timeoutMap: {}
-                };
-            },
             methods: {
                 notificationStyle(notification) {
                     const accent = notification?.color || '#ffffff';
@@ -380,36 +383,8 @@
                     if (accent === '#ef4444') textColor = '#fecaca';
                     return {
                         color: textColor,
-                        boxShadow: `0 16px 30px -12px rgba(0,0,0,0.65), inset 3px 0 0 ${accent}`
                     };
                 }
-            },
-            watch: {
-                notifications: {
-                    immediate: true,
-                    deep: true,
-                    handler(nextNotifications) {
-                        const activeIds = new Set(nextNotifications.map((notification) => notification.id));
-                        Object.keys(this.timeoutMap).forEach((id) => {
-                            const numericId = Number(id);
-                            if (!activeIds.has(numericId)) {
-                                clearTimeout(this.timeoutMap[numericId]);
-                                delete this.timeoutMap[numericId];
-                            }
-                        });
-
-                        nextNotifications.forEach((notification) => {
-                            if (notification.isCritical || this.timeoutMap[notification.id]) return;
-                            this.timeoutMap[notification.id] = setTimeout(() => {
-                                this.$emit('dismiss', notification.id);
-                                delete this.timeoutMap[notification.id];
-                            }, notification.duration);
-                        });
-                    }
-                }
-            },
-            beforeUnmount() {
-                Object.values(this.timeoutMap).forEach((timerId) => clearTimeout(timerId));
             },
             template: `
                 <div class="absolute top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-[400px] px-2 pointer-events-none">
@@ -427,18 +402,20 @@
                         <div
                             v-for="notification in notifications"
                             :key="notification.id"
-                            class="bg-[#303440]/95 backdrop-blur border border-white/5 py-4 px-5 rounded-2xl font-normal text-[13px] leading-relaxed shadow-[0_16px_30px_-12px_rgba(0,0,0,0.65)] text-left w-full max-w-[560px]"
+                            class="relative bg-[#303440]/95 backdrop-blur border border-white/5 py-4 px-5 rounded-2xl font-normal text-[13px] leading-relaxed text-left w-full max-w-[560px]"
                             :class="notification.isCritical ? 'pointer-events-auto' : 'pointer-events-none'"
                             :style="notificationStyle(notification)"
                         >
-                            <div class="whitespace-pre-line">{{ notification.text }}</div>
                             <button
                                 v-if="notification.isCritical"
-                                class="mt-3 px-4 py-1.5 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 transition-colors text-[13px] font-normal text-[#ece6db]"
+                                class="absolute top-2 right-2 w-6 h-6 rounded-md border border-white/10 bg-white/5 hover:bg-white/15 transition-colors text-[12px] leading-none font-normal text-[#ece6db] flex items-center justify-center"
                                 @click="$emit('dismiss', notification.id)"
+                                aria-label="Закрыть"
                             >
-                                Понятно
+                                ✕
                             </button>
+                            <div class="whitespace-pre-line">{{ notification.text }}</div>
+
                         </div>
                     </transition-group>
                 </div>
@@ -489,6 +466,34 @@
             return gameState.currentLevel?.goals || { FOOD: 0, MONEY: 0, VILLAGE: 0, CITY: 0 };
         }
 
+        function getLevelInstructions(level) {
+            if (level && typeof level.instructions === 'object' && level.instructions !== null) {
+                return level.instructions;
+            }
+            if (typeof level?.instruction === 'string') {
+                return { "0": level.instruction };
+            }
+            return {};
+        }
+
+        function getInstructionForTurn(level, turn) {
+            const instructions = getLevelInstructions(level);
+            return instructions[String(turn)] || null;
+        }
+
+        function showInstructionForCurrentTurn() {
+            if (!store?.gameStarted || !store.currentLevel) return;
+            const currentTurn = Number.isFinite(store.turns) ? store.turns : 0;
+            const instructionText = getInstructionForTurn(store.currentLevel, currentTurn);
+            if (!instructionText) return;
+            store.addNotification({
+                text: instructionText,
+                color: "#3b82f6",
+                duration: 5000,
+                isCritical: true
+            });
+        }
+
         function hasWonCurrentLevel(gameState) {
             const goals = getCurrentLevelGoals(gameState);
             const stats = getPlayerGoalStats(gameState);
@@ -533,7 +538,8 @@
                 );
             }
 
-            store.initializeDice();
+            const initialRolls = store.currentLevelId === 'level_01' ? [6, 3, 8] : null;
+            store.initializeDice(initialRolls);
             updateCurrentRollTileVisuals();
         }
 
@@ -564,6 +570,7 @@
         function createHex(x, y, q, r, typeKey, number) {
             const container = scene.add.container(x, y);
             const graphics = scene.add.graphics();
+            const lightOverlay = scene.add.graphics();
             const points = [];
             const hexHeight = Math.sqrt(3) * HEX_SIZE;
             for (let i = 0; i < 6; i++) {
@@ -588,7 +595,15 @@
                 color: '#444'
             }).setOrigin(0.5).setVisible(false);
 
-            const hexData = { container, q, r, number, typeKey, graphics, tileBgSprite, iconSprite, numText, resourceText, pulseTween: null };
+            lightOverlay.fillStyle(0xffffff, 1);
+            lightOverlay.beginPath();
+            lightOverlay.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < 6; i++) lightOverlay.lineTo(points[i].x, points[i].y);
+            lightOverlay.closePath();
+            lightOverlay.fillPath();
+            lightOverlay.setAlpha(0);
+
+            const hexData = { container, q, r, number, typeKey, graphics, lightOverlay, tileBgSprite, iconSprite, numText, resourceText, highlightTween: null };
 
             hexData.draw = () => {
                 graphics.clear();
@@ -617,7 +632,7 @@
             };
 
             hexData.draw();
-            container.add([graphics, tileBgSprite, iconSprite, numBg, resourceText, numText]);
+            container.add([graphics, tileBgSprite, lightOverlay, iconSprite, numBg, resourceText, numText]);
 
             const poly = new Phaser.Geom.Polygon(points);
             graphics.setInteractive(poly, Phaser.Geom.Polygon.Contains);
@@ -718,29 +733,29 @@
             Object.values(hexGrid).forEach((hex) => {
                 const isMatch = currentRoll !== undefined && hex.number === currentRoll;
 
-                if (isMatch && !hex.pulseTween) {
-                    const pulseTarget = hex.tileBgSprite?.visible ? hex.tileBgSprite : hex.graphics;
-                    hex.pulseTween = scene.tweens.add({
-                        targets: pulseTarget,
-                        alpha: 0.75,
-                        duration: 1000,
+                if (isMatch && !hex.highlightTween) {
+                    hex.lightOverlay.setAlpha(0.2);
+                    hex.highlightTween = scene.tweens.add({
+                        targets: hex.lightOverlay,
+                        alpha: 0.35,
+                        duration: 500,
                         yoyo: true,
-                        repeat: 3
+                        repeat: -1
                     });
                 }
 
                 if (isMatch) {
-                    hex.iconSprite.setTint(0x111111);
+                    hex.iconSprite.clearTint();
                     hex.iconSprite.setAlpha(1);
                 } else {
                     hex.iconSprite.clearTint();
                     hex.iconSprite.setAlpha(0.85);
                 }
 
-                if (!isMatch && hex.pulseTween) {
-                    hex.pulseTween.stop();
-                    hex.pulseTween = null;
-                    (hex.tileBgSprite?.visible ? hex.tileBgSprite : hex.graphics).setAlpha(1);
+                if (!isMatch && hex.highlightTween) {
+                    hex.highlightTween.stop();
+                    hex.highlightTween = null;
+                    hex.lightOverlay.setAlpha(0);
                 }
             });
         }
@@ -748,6 +763,7 @@
         function executeTurn() {
             const roll = store.consumeDiceRoll();
             if (roll === null) return;
+            store.clearNotifications();
             store.incrementTurns();
             store.adjustHealth(-5);
             updateCurrentRollTileVisuals();
@@ -782,6 +798,8 @@
             if (hasWonCurrentLevel(store)) {
                 store.markLevelCompleted(store.currentLevelId);
             }
+
+            showInstructionForCurrentTurn();
 
             playerIsMoving = false;
         }
@@ -838,12 +856,15 @@
                     if (hasWonCurrentLevel(gameStore)) {
                         return {
                             title: 'ПОБЕДА',
-                            message: gameStore.currentLevel?.instruction || 'Цели уровня выполнены.',
+                            message: currentLevelIntroInstruction.value || 'Цели уровня выполнены.',
                             colorClass: 'text-yellow-500'
                         };
                     }
                     return null;
                 });
+                const currentLevelIntroInstruction = computed(() =>
+                    getInstructionForTurn(gameStore.currentLevel, 0) || ''
+                );
 
                 const nextType = computed(() => {
                     if (!gameStore.currentTile) return null;
@@ -919,16 +940,7 @@
                         buildMapFromCurrentLevel();
                     }
                     gameStore.gameStarted = true;
-                    const levelInstruction =
-                        gameStore.levels[gameStore.currentLevelId]?.instruction ||
-                        gameStore.currentLevel?.instruction ||
-                        'Уровень загружен.';
-                    gameStore.addNotification({
-                        text: levelInstruction,
-                        color: "#3b82f6",
-                        duration: 5000,
-                        isCritical: true
-                    });
+                    showInstructionForCurrentTurn();
                 }
 
                 function returnToStartScreen() {
@@ -1014,6 +1026,7 @@
                 return {
                     store: gameStore,
                     winState,
+                    currentLevelIntroInstruction,
                     missingGold,
                     showShortage,
                     canUpgrade,

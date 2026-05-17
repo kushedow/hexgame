@@ -3,10 +3,9 @@
     "name": "Первый шаг",
     "radius": 1,
     "start": {
-      "FOOD": 60,
-      "MONEY": 40
+      "FOOD": 50,
+      "MONEY": 0
     },
-    "instruction": "Небольшой остров без опасных клеток. Приключение начинается!\nЦель уровня: набрать 0 еды, 100 золота, 0 деревень и 0 замков.",
     "goals": {
       "FOOD": 0,
       "MONEY": 100,
@@ -14,14 +13,42 @@
       "CITY": 0
     },
     "map": [
-      [5, "FIELD"],
-      [2, "MOUNTAIN"],
-      [6, "FIELD"],
-      [3, "MOUNTAIN"],
-      [8, "FIELD"],
-      [10, "MOUNTAIN"],
-      [7, "FIELD"]
-    ]
+      [
+        5,
+        "FIELD"
+      ],
+      [
+        2,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        7,
+        "FIELD"
+      ]
+    ],
+    "instructions": {
+      "0": "Приключение начинается!\n На игровом поле активно поле 6 – бегите туда, чтобы украсть еду",
+      "1": "Отлично! Теперь бегите на поле 3!\nВ горах можно украсть золото! ",
+      "2": "Класс! Теперь снова на едой на поле 8!\nКаждый ход тратит 5 еды и их нужно восстанавливать!",
+      "3": "Следите за кубиками наверху - они показывают, какие цифры выпадут следующими, если вы попадете на неактивное поле – вы не получите ничего!",
+      "5": "Продолжайте движение! Цель раунда – собрать 100 золота."
+    }
   },
   "level_02": {
     "name": "Камни и пыль",
@@ -30,7 +57,6 @@
       "FOOD": 55,
       "MONEY": 35
     },
-    "instruction": "Новый тип тайла: Пустошь (WASTELAND) - штрафная клетка, которая усложняет маршрут.\nЦель уровня: набрать 15 еды, 85 золота, 0 деревень и 0 замков.",
     "goals": {
       "FOOD": 15,
       "MONEY": 85,
@@ -38,14 +64,38 @@
       "CITY": 0
     },
     "map": [
-      [5, "FIELD"],
-      [2, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "MOUNTAIN"],
-      [8, "FIELD"],
-      [10, "WASTELAND"],
-      [7, "FIELD"]
-    ]
+      [
+        5,
+        "FIELD"
+      ],
+      [
+        2,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        7,
+        "FIELD"
+      ]
+    ],
+    "instructions": {
+      "0": "Новый тип тайла: Пустошь (WASTELAND) - штрафная клетка, которая усложняет маршрут.\nЦель уровня: набрать 15 еды, 85 золота, 0 деревень и 0 замков."
+    }
   },
   "level_03": {
     "name": "Суровый круг",
@@ -54,7 +104,6 @@
       "FOOD": 50,
       "MONEY": 30
     },
-    "instruction": "Та же площадь, но больше штрафных клеток. Ошибки стоят дороже.\nЦель уровня: набрать 10 еды, 100 золота, 0 деревень и 0 замков.",
     "goals": {
       "FOOD": 10,
       "MONEY": 100,
@@ -62,14 +111,38 @@
       "CITY": 0
     },
     "map": [
-      [5, "WASTELAND"],
-      [9, "MOUNTAIN"],
-      [6, "FIELD"],
-      [4, "FIELD"],
-      [8, "MOUNTAIN"],
-      [10, "FIELD"],
-      [7, "WASTELAND"]
-    ]
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        4,
+        "FIELD"
+      ],
+      [
+        8,
+        "MOUNTAIN"
+      ],
+      [
+        10,
+        "FIELD"
+      ],
+      [
+        7,
+        "WASTELAND"
+      ]
+    ],
+    "instructions": {
+      "0": "Та же площадь, но больше штрафных клеток. Ошибки стоят дороже.\nЦель уровня: набрать 10 еды, 100 золота, 0 деревень и 0 замков."
+    }
   },
   "level_04": {
     "name": "Охота за золотом",
@@ -78,7 +151,6 @@
       "FOOD": 55,
       "MONEY": 45
     },
-    "instruction": "На этом уровне достаточно еды, но горы только одни. Запаситесь терпением, чтобы собрать  150 золота",
     "goals": {
       "FOOD": 10,
       "MONEY": 120,
@@ -86,14 +158,38 @@
       "CITY": 0
     },
     "map": [
-      [5, "WASTELAND"],
-      [9, "WASTELAND"],
-      [6, "FIELD"],
-      [4, "FIELD"],
-      [8, "FIELD"],
-      [10, "FIELD"],
-      [7, "MOUNTAIN"]
-    ]
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        4,
+        "FIELD"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "FIELD"
+      ],
+      [
+        7,
+        "MOUNTAIN"
+      ]
+    ],
+    "instructions": {
+      "0": "На этом уровне достаточно еды, но горы только одни. Запаситесь терпением, чтобы собрать  150 золота"
+    }
   },
   "level_05": {
     "name": "Экспедиция через пустоши",
@@ -102,34 +198,93 @@
       "FOOD": 50,
       "MONEY": 0
     },
-    "instruction": "За пустошами много золота, но к путешествию нужно будет подготовиться! \nЦель уровня: набрать 150 золота",
     "goals": {
       "FOOD": 0,
       "MONEY": 150,
       "VILLAGE": 0,
       "CITY": 0
     },
-    "map":  [
-      [ 5, "FIELD" ],
-      [ 2,  "FIELD" ],
-      [ 6,  "FIELD" ],
-      [ 3,  "WASTELAND" ],
-      [ 8,  "MOUNTAIN" ],
-      [ 10, "MOUNTAIN" ],
-      [ 9,  "MOUNTAIN"  ],
-      [ 12,  "WASTELAND" ],
-      [ 11,   "MOUNTAIN" ],
-      [ 4,  "MOUNTAIN" ],
-      [ 8,  "MOUNTAIN" ],
-      [ 10,  "WASTELAND" ],
-      [ 9, "FIELD" ],
-      [ 4, "FIELD" ],
-      [ 5,  "WASTELAND" ],
-      [ 6,  "WASTELAND"],
-      [ 3,  "WASTELAND" ],
-      [ 11, "WASTELAND" ],
-      [ 7, "FIELD" ]
-    ]
+    "map": [
+      [
+        5,
+        "FIELD"
+      ],
+      [
+        2,
+        "FIELD"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        3,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "MOUNTAIN"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "MOUNTAIN"
+      ],
+      [
+        12,
+        "WASTELAND"
+      ],
+      [
+        11,
+        "MOUNTAIN"
+      ],
+      [
+        4,
+        "MOUNTAIN"
+      ],
+      [
+        8,
+        "MOUNTAIN"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        4,
+        "FIELD"
+      ],
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "WASTELAND"
+      ],
+      [
+        11,
+        "WASTELAND"
+      ],
+      [
+        7,
+        "FIELD"
+      ]
+    ],
+    "instructions": {
+      "0": "За пустошами много золота, но к путешествию нужно будет подготовиться! \nЦель уровня: набрать 150 золота"
+    }
   },
   "level_06": {
     "name": "Первые поселения",
@@ -138,7 +293,6 @@
       "FOOD": 45,
       "MONEY": 55
     },
-    "instruction": "Новый тип тайла: Деревня (VILLAGE) - опорная точка для развития поселений.\nЦель уровня: набрать 15 еды, 150 золота, 2 деревни и 0 замков.",
     "goals": {
       "FOOD": 15,
       "MONEY": 150,
@@ -146,26 +300,86 @@
       "CITY": 0
     },
     "map": [
-      [5, "FOREST"],
-      [2, "VILLAGE"],
-      [6, "WASTELAND"],
-      [3, "FIELD"],
-      [8, "MOUNTAIN"],
-      [10, "FOREST"],
-      [9, "WASTELAND"],
-      [12, "LAVA"],
-      [11, "VILLAGE"],
-      [4, "MOUNTAIN"],
-      [8, "FIELD"],
-      [10, "WASTELAND"],
-      [9, "FOREST"],
-      [4, "FIELD"],
-      [5, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "LAVA"],
-      [11, "FIELD"],
-      [7, "FOREST"]
-    ]
+      [
+        5,
+        "FOREST"
+      ],
+      [
+        2,
+        "VILLAGE"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "FIELD"
+      ],
+      [
+        8,
+        "MOUNTAIN"
+      ],
+      [
+        10,
+        "FOREST"
+      ],
+      [
+        9,
+        "WASTELAND"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "VILLAGE"
+      ],
+      [
+        4,
+        "MOUNTAIN"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "FOREST"
+      ],
+      [
+        4,
+        "FIELD"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        7,
+        "FOREST"
+      ]
+    ],
+    "instructions": {
+      "0": "Новый тип тайла: Деревня (VILLAGE) - опорная точка для развития поселений.\nЦель уровня: набрать 15 еды, 150 золота, 2 деревни и 0 замков."
+    }
   },
   "level_07": {
     "name": "Крепостной узел",
@@ -174,7 +388,6 @@
       "FOOD": 40,
       "MONEY": 70
     },
-    "instruction": "Новый тип тайла: Замок (CITY) - мощный, но требовательный к экономике центр развития.\nЦель уровня: набрать 10 еды, 180 золота, 2 деревни и 1 замок.",
     "goals": {
       "FOOD": 10,
       "MONEY": 180,
@@ -182,26 +395,86 @@
       "CITY": 1
     },
     "map": [
-      [5, "CITY"],
-      [2, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "FOREST"],
-      [8, "VILLAGE"],
-      [10, "MOUNTAIN"],
-      [9, "WASTELAND"],
-      [12, "LAVA"],
-      [11, "FIELD"],
-      [4, "CITY"],
-      [8, "FOREST"],
-      [10, "WASTELAND"],
-      [9, "FIELD"],
-      [4, "VILLAGE"],
-      [5, "MOUNTAIN"],
-      [6, "WASTELAND"],
-      [3, "LAVA"],
-      [11, "FIELD"],
-      [7, "FOREST"]
-    ]
+      [
+        5,
+        "CITY"
+      ],
+      [
+        2,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "FOREST"
+      ],
+      [
+        8,
+        "VILLAGE"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "WASTELAND"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        4,
+        "CITY"
+      ],
+      [
+        8,
+        "FOREST"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        4,
+        "VILLAGE"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        7,
+        "FOREST"
+      ]
+    ],
+    "instructions": {
+      "0": "Новый тип тайла: Замок (CITY) - мощный, но требовательный к экономике центр развития.\nЦель уровня: набрать 10 еды, 180 золота, 2 деревни и 1 замок."
+    }
   },
   "level_08": {
     "name": "Большой архипелаг",
@@ -210,7 +483,6 @@
       "FOOD": 55,
       "MONEY": 65
     },
-    "instruction": "Большая карта. Расширяйся через лес и деревни, избегая лавовых дуг.\nЦель уровня: набрать 20 еды, 220 золота, 4 деревни и 1 замок.",
     "goals": {
       "FOOD": 20,
       "MONEY": 220,
@@ -218,9 +490,158 @@
       "CITY": 1
     },
     "map": [
-      [5, "FIELD"], [2, "FOREST"], [6, "MOUNTAIN"], [3, "WASTELAND"], [8, "FIELD"], [10, "FOREST"], [9, "MOUNTAIN"], [12, "LAVA"], [11, "FIELD"], [4, "FOREST"], [8, "MOUNTAIN"], [10, "WASTELAND"], [9, "FIELD"], [4, "VILLAGE"], [5, "MOUNTAIN"], [6, "WASTELAND"], [3, "LAVA"], [11, "FIELD"], [7, "FOREST"],
-      [5, "MOUNTAIN"], [2, "FIELD"], [6, "FOREST"], [3, "WASTELAND"], [8, "VILLAGE"], [10, "MOUNTAIN"], [9, "FIELD"], [12, "LAVA"], [11, "FOREST"], [4, "WASTELAND"], [8, "FIELD"], [10, "MOUNTAIN"], [9, "VILLAGE"], [4, "FOREST"], [5, "WASTELAND"], [6, "FIELD"], [3, "MOUNTAIN"], [11, "FOREST"]
-    ]
+      [
+        5,
+        "FIELD"
+      ],
+      [
+        2,
+        "FOREST"
+      ],
+      [
+        6,
+        "MOUNTAIN"
+      ],
+      [
+        3,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "FOREST"
+      ],
+      [
+        9,
+        "MOUNTAIN"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        4,
+        "FOREST"
+      ],
+      [
+        8,
+        "MOUNTAIN"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        4,
+        "VILLAGE"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        7,
+        "FOREST"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        2,
+        "FIELD"
+      ],
+      [
+        6,
+        "FOREST"
+      ],
+      [
+        3,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "VILLAGE"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "FOREST"
+      ],
+      [
+        4,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "VILLAGE"
+      ],
+      [
+        4,
+        "FOREST"
+      ],
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        11,
+        "FOREST"
+      ]
+    ],
+    "instructions": {
+      "0": "Большая карта. Расширяйся через лес и деревни, избегая лавовых дуг.\nЦель уровня: набрать 20 еды, 220 золота, 4 деревни и 1 замок."
+    }
   },
   "level_09": {
     "name": "Риск и капитал",
@@ -229,7 +650,6 @@
       "FOOD": 45,
       "MONEY": 80
     },
-    "instruction": "Больше золота, больше угроз. Используй замки как экономические якоря.\nЦель уровня: набрать 15 еды, 260 золота, 5 деревень и 2 замка.",
     "goals": {
       "FOOD": 15,
       "MONEY": 260,
@@ -237,9 +657,158 @@
       "CITY": 2
     },
     "map": [
-      [5, "WASTELAND"], [2, "CITY"], [6, "MOUNTAIN"], [3, "FOREST"], [8, "FIELD"], [10, "LAVA"], [9, "MOUNTAIN"], [12, "WASTELAND"], [11, "FIELD"], [4, "CITY"], [8, "FOREST"], [10, "WASTELAND"], [9, "FIELD"], [4, "VILLAGE"], [5, "MOUNTAIN"], [6, "WASTELAND"], [3, "LAVA"], [11, "FIELD"], [7, "FOREST"],
-      [5, "MOUNTAIN"], [2, "WASTELAND"], [6, "FOREST"], [3, "CITY"], [8, "VILLAGE"], [10, "MOUNTAIN"], [9, "FIELD"], [12, "LAVA"], [11, "FOREST"], [4, "WASTELAND"], [8, "FIELD"], [10, "MOUNTAIN"], [9, "VILLAGE"], [4, "FOREST"], [5, "WASTELAND"], [6, "FIELD"], [3, "MOUNTAIN"], [11, "FOREST"]
-    ]
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        2,
+        "CITY"
+      ],
+      [
+        6,
+        "MOUNTAIN"
+      ],
+      [
+        3,
+        "FOREST"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "LAVA"
+      ],
+      [
+        9,
+        "MOUNTAIN"
+      ],
+      [
+        12,
+        "WASTELAND"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        4,
+        "CITY"
+      ],
+      [
+        8,
+        "FOREST"
+      ],
+      [
+        10,
+        "WASTELAND"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        4,
+        "VILLAGE"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        7,
+        "FOREST"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        2,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FOREST"
+      ],
+      [
+        3,
+        "CITY"
+      ],
+      [
+        8,
+        "VILLAGE"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "FOREST"
+      ],
+      [
+        4,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "VILLAGE"
+      ],
+      [
+        4,
+        "FOREST"
+      ],
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        11,
+        "FOREST"
+      ]
+    ],
+    "instructions": {
+      "0": "Больше золота, больше угроз. Используй замки как экономические якоря.\nЦель уровня: набрать 15 еды, 260 золота, 5 деревень и 2 замка."
+    }
   },
   "level_10": {
     "name": "Железный колонист",
@@ -248,7 +817,6 @@
       "FOOD": 40,
       "MONEY": 90
     },
-    "instruction": "Финальный сценарий: много штрафных клеток и высокий порог развития.\nЦель уровня: набрать 15 еды, 320 золота, 6 деревень и 3 замка.",
     "goals": {
       "FOOD": 15,
       "MONEY": 320,
@@ -256,8 +824,157 @@
       "CITY": 3
     },
     "map": [
-      [5, "LAVA"], [2, "CITY"], [6, "WASTELAND"], [3, "MOUNTAIN"], [8, "FOREST"], [10, "LAVA"], [9, "MOUNTAIN"], [12, "WASTELAND"], [11, "CITY"], [4, "WASTELAND"], [8, "FOREST"], [10, "MOUNTAIN"], [9, "FIELD"], [4, "VILLAGE"], [5, "MOUNTAIN"], [6, "WASTELAND"], [3, "LAVA"], [11, "FIELD"], [7, "CITY"],
-      [5, "MOUNTAIN"], [2, "WASTELAND"], [6, "FOREST"], [3, "CITY"], [8, "VILLAGE"], [10, "MOUNTAIN"], [9, "WASTELAND"], [12, "LAVA"], [11, "FOREST"], [4, "WASTELAND"], [8, "FIELD"], [10, "MOUNTAIN"], [9, "VILLAGE"], [4, "FOREST"], [5, "WASTELAND"], [6, "FIELD"], [3, "MOUNTAIN"], [11, "FOREST"]
-    ]
+      [
+        5,
+        "LAVA"
+      ],
+      [
+        2,
+        "CITY"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        8,
+        "FOREST"
+      ],
+      [
+        10,
+        "LAVA"
+      ],
+      [
+        9,
+        "MOUNTAIN"
+      ],
+      [
+        12,
+        "WASTELAND"
+      ],
+      [
+        11,
+        "CITY"
+      ],
+      [
+        4,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "FOREST"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "FIELD"
+      ],
+      [
+        4,
+        "VILLAGE"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        6,
+        "WASTELAND"
+      ],
+      [
+        3,
+        "LAVA"
+      ],
+      [
+        11,
+        "FIELD"
+      ],
+      [
+        7,
+        "CITY"
+      ],
+      [
+        5,
+        "MOUNTAIN"
+      ],
+      [
+        2,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FOREST"
+      ],
+      [
+        3,
+        "CITY"
+      ],
+      [
+        8,
+        "VILLAGE"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "WASTELAND"
+      ],
+      [
+        12,
+        "LAVA"
+      ],
+      [
+        11,
+        "FOREST"
+      ],
+      [
+        4,
+        "WASTELAND"
+      ],
+      [
+        8,
+        "FIELD"
+      ],
+      [
+        10,
+        "MOUNTAIN"
+      ],
+      [
+        9,
+        "VILLAGE"
+      ],
+      [
+        4,
+        "FOREST"
+      ],
+      [
+        5,
+        "WASTELAND"
+      ],
+      [
+        6,
+        "FIELD"
+      ],
+      [
+        3,
+        "MOUNTAIN"
+      ],
+      [
+        11,
+        "FOREST"
+      ]
+    ],
+    "instructions": {
+      "0": "Финальный сценарий: много штрафных клеток и высокий порог развития.\nЦель уровня: набрать 15 еды, 320 золота, 6 деревень и 3 замка."
+    }
   }
 }
